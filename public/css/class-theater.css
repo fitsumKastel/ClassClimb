@@ -133,6 +133,14 @@ body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     border-radius: 0;
 }
 
+.cc-leaderboard-pdf-stage.cc-pdf-stage--fullscreen .cc-leaderboard-pdf-host,
+.cc-leaderboard-pdf-stage.cc-pdf-stage--fullscreen .cc-leaderboard-pdf-canvas-area,
+.cc-leaderboard-pdf-stage.cc-pdf-stage--fullscreen .cc-pdf-canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
 /* Portrait phone: rotate page content (user turns device to match) */
 body.cc-theater-portrait-rotated {
     overflow: hidden !important;

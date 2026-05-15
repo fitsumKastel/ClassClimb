@@ -496,9 +496,13 @@
             listEl.closest('.cc-leaderboard-layout');
 
         clearEl(root);
-        var pdfHost = root;
-        pdfHost.id = 'cc-leaderboard-pdf-host';
+        var pdfStage = root;
+        pdfStage.id = 'cc-leaderboard-pdf-stage';
+        pdfStage.className = 'cc-leaderboard-pdf-stage flex h-full w-full min-h-0 flex-col';
+
+        var pdfHost = document.createElement('div');
         pdfHost.className = 'cc-leaderboard-pdf-host hidden flex h-full w-full min-h-0 flex-col';
+        pdfStage.appendChild(pdfHost);
 
         var canvasArea = document.createElement('div');
         canvasArea.className = 'cc-leaderboard-pdf-canvas-area relative flex min-h-0 flex-1 flex-col';
@@ -522,7 +526,7 @@
         var nav = document.createElement('div');
         nav.id = 'cc-pdf-nav';
         nav.className =
-            'pointer-events-auto hidden max-w-[min(100%,20rem)] flex-wrap items-center justify-end gap-2 rounded-lg border border-zinc-300/80 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm';
+            'pointer-events-auto hidden flex max-w-[min(100%,20rem)] flex-wrap items-center justify-end gap-2 rounded-lg border border-zinc-300/80 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm';
         nav.innerHTML = state.isTeacher
             ? '<div class="flex items-center gap-2">' +
               '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100">Prev</button>' +
@@ -538,7 +542,7 @@
         canvasArea.appendChild(chrome);
         pdfHost.appendChild(canvasArea);
 
-        bindFullscreen(pdfHost, fsBtn, function () {
+        bindFullscreen(pdfStage, fsBtn, function () {
             renderCurrent(state, [pair.canvas]);
         });
 
