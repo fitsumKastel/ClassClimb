@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClassClimb Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans', sans-serif; background: #f4f4f5; color: #18181b; min-height: 100vh; font-size: 14px; }
+        .container { max-width: 780px; margin: 0 auto; padding: 24px 16px; }
+        .card { background: #fff; border-radius: 12px; border: 1px solid #e4e4e7; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        h1 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        h2 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #3f3f46; }
+        .subtitle { font-size: 12px; color: #71717a; margin-bottom: 16px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 8px; }
+        .stat-box { background: #fafafa; border: 1px solid #e4e4e7; border-radius: 10px; padding: 14px 16px; text-align: center; }
+        .stat-number { font-size: 15px; font-weight: 700; color: #18181b; }
+        .stat-number.green { color: #16a34a; }
+        .stat-number.red { color: #dc2626; }
+        .stat-number.blue { color: #2563eb; }
+        .stat-label { font-size: 11px; color: #71717a; margin-top: 2px; }
+        .progress-wrap { margin-top: 16px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .progress-header span { font-size: 12px; color: #3f3f46; }
+        .progress-header strong { font-size: 12px; font-weight: 700; }
+        .progress-bar { height: 10px; border-radius: 6px; background: #fee2e2; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #22c55e, #4ade80); transition: width 0.4s ease; }
+        .chart-bar-wrap { margin-bottom: 10px; }
+        .chart-label { font-size: 12px; color: #3f3f46; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
+        .chart-label .counts { font-size: 11px; }
+        .chart-label .counts .connected { color: #16a34a; font-weight: 600; }
+        .chart-label .counts .sep { color: #d4d4d8; margin: 0 3px; }
+        .chart-label .counts .not-connected { color: #dc2626; font-weight: 600; }
+        .chart-bar { height: 22px; border-radius: 6px; background: #fee2e2; overflow: hidden; display: flex; }
+        .chart-bar-green { height: 100%; background: linear-gradient(90deg, #22c55e, #4ade80); transition: width 0.4s ease; }
+        .chart-bar-red { height: 100%; background: #fca5a5; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { text-align: left; font-weight: 600; color: #71717a; padding: 8px 10px; border-bottom: 1px solid #e4e4e7; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px; border-bottom: 1px solid #f4f4f5; color: #3f3f46; }
+        tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+        .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+        .login-card { background: #fff; border-radius: 14px; border: 1px solid #e4e4e7; padding: 32px 28px; max-width: 360px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.06); text-align: center; }
+        .login-card h1 { font-size: 15px; margin-bottom: 6px; }
+        .login-card p { font-size: 12px; color: #71717a; margin-bottom: 20px; }
+        .login-input { width: 100%; padding: 10px 14px; border: 1px solid #e4e4e7; border-radius: 10px; font-size: 13px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+        .login-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .login-btn { width: 100%; margin-top: 12px; padding: 10px; background: #18181b; color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+        .login-btn:hover { background: #3f3f46; }
+        .error-msg { color: #dc2626; font-size: 12px; margin-top: 10px; }
+        .empty { text-align: center; padding: 32px; color: #a1a1aa; font-size: 13px; }
+        .section-divider { border: none; border-top: 1px solid #e4e4e7; margin: 20px 0; }
+    </style>
+</head>
+<body>
+<% if (!authenticated) { %>
+    <div class="login-wrap">
+        <form class="login-card" method="POST" action="/status" autocomplete="off">
+            <h1>Status Dashboard</h1>
+            <p>Enter the admin password to continue.</p>
+            <input
+                type="password"
+                name="password"
+                class="login-input"
+                placeholder="Password"
+                autofocus
+                required
+            />
+            <button type="submit" class="login-btn">Access</button>
+            <% if (typeof error !== 'undefined' && error) { %>
+                <p class="error-msg"><%= error %></p>
+            <% } %>
+        </form>
+    </div>
+<% } else if (!data) { %>
+    <div class="container">
+        <div class="card"><p class="empty"><%= error || 'No data available.' %></p></div>
+    </div>
+<% } else { %>
+    <div class="container">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <form method="POST" action="/status/logout" style="margin:0;">
+                <button type="submit" class="login-btn" style="width:auto;padding:6px 14px;font-size:12px;background:#71717a;">Logout</button>
+            </form>
+        </div>
+        <div class="card">
+            <h1>Telegram Connection Overview</h1>
+            <p class="subtitle">Students who connected their Telegram accounts to receive XP notifications.</p>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-number"><%= data.totalStudents %></div>
+                    <div class="stat-label">Total students</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number green"><%= data.totalConnected %></div>
+                    <div class="stat-label">Connected</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number red"><%= data.totalNotConnected %></div>
+                    <div class="stat-label">Not connected</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number blue"><%= data.connectionRate %>%</div>
+                    <div class="stat-label">Connection rate</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number"><%= data.totalClasses %></div>
+                    <div class="stat-label">Total classes</div>
+                </div>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-header">
+                    <span>Overall connection rate</span>
+                    <strong><%= data.connectionRate %>%</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:<%= data.connectionRate %>%"></div>
+                </div>
+            </div>
+        </div>
+
+        <% if (data.classes.length > 0) { %>
+        <div class="card">
+            <h2>Per-Class Breakdown</h2>
+            <% var maxStudents = Math.max.apply(null, data.classes.map(function(c){ return c.totalStudents || 1; })); %>
+            <% data.classes.forEach(function(cls) { %>
+                <% if (cls.totalStudents > 0) { %>
+                <div class="chart-bar-wrap">
+                    <div class="chart-label">
+                        <span><%= cls.label %></span>
+                        <span class="counts">
+                            <span class="connected"><%= cls.connected %> connected</span>
+                            <span class="sep">/</span>
+                            <span class="not-connected"><%= cls.notConnected %> not</span>
+                        </span>
+                    </div>
+                    <div class="chart-bar" style="width:100%">
+                        <div class="chart-bar-green" style="width:<%= cls.totalStudents > 0 ? Math.round((cls.connected / cls.totalStudents) * 100) : 0 %>%"></div>
+                        <div class="chart-bar-red" style="width:<%= cls.totalStudents > 0 ? Math.round((cls.notConnected / cls.totalStudents) * 100) : 0 %>%"></div>
+                    </div>
+                </div>
+                <% } %>
+            <% }); %>
+        </div>
+        <% } %>
+
+        <div class="card" style="padding:0;overflow:hidden;" id="connections-card">
+            <div style="padding:16px 20px;border-bottom:1px solid #e4e4e7;display:flex;align-items:center;justify-content:space-between;">
+                <h2 style="margin-bottom:0;">All Connections (<%= data.subscriptions.length %>)</h2>
+                <span id="page-info" style="font-size:11px;color:#71717a;"></span>
+            </div>
+            <% if (data.subscriptions.length > 0) { %>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Telegram ID</th>
+                                <th>Class</th>
+                                <th>School</th>
+                                <th>Link ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="connections-tbody">
+                            <% data.subscriptions.forEach(function(sub, i) { %>
+                                <tr>
+                                    <td style="color:#a1a1aa;"><%= i + 1 %></td>
+                                    <td><span class="badge"><%= sub.telegram_id %></span></td>
+                                    <td><%= sub.class_name %></td>
+                                    <td><%= sub.school_name || '—' %></td>
+                                    <td style="font-family:monospace;font-size:11px;color:#71717a;"><%= sub.link_id %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination-controls" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-top:1px solid #e4e4e7;">
+                    <button type="button" id="page-prev" style="padding:6px 12px;border:1px solid #e4e4e7;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Prev</button>
+                    <span id="page-label" style="font-size:12px;color:#3f3f46;font-weight:500;"></span>
+                    <button type="button" id="page-next" style="padding:6px 12px;border:1px solid #e4e4e7;border-radius:8px;background:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Next</button>
+                </div>
+                <script>
+                (function() {
+                    var tbody = document.getElementById('connections-tbody');
+                    var rows = tbody ? Array.prototype.slice.call(tbody.querySelectorAll('tr')) : [];
+                    var pageSize = 20;
+                    var currentPage = 1;
+                    var totalPages = Math.ceil(rows.length / pageSize) || 1;
+                    var prevBtn = document.getElementById('page-prev');
+                    var nextBtn = document.getElementById('page-next');
+                    var pageLabel = document.getElementById('page-label');
+                    var pageInfo = document.getElementById('page-info');
+
+                    function render() {
+                        var start = (currentPage - 1) * pageSize;
+                        var end = start + pageSize;
+                        rows.forEach(function(row, i) {
+                            row.style.display = (i >= start && i < end) ? '' : 'none';
+                        });
+                        pageLabel.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+                        pageInfo.textContent = 'Showing ' + (start + 1) + '–' + Math.min(end, rows.length) + ' of ' + rows.length;
+                        prevBtn.disabled = currentPage <= 1;
+                        nextBtn.disabled = currentPage >= totalPages;
+                        prevBtn.style.opacity = prevBtn.disabled ? '0.4' : '1';
+                        nextBtn.style.opacity = nextBtn.disabled ? '0.4' : '1';
+                    }
+
+                    prevBtn.addEventListener('click', function() {
+                        if (currentPage > 1) { currentPage--; render(); }
+                    });
+                    nextBtn.addEventListener('click', function() {
+                        if (currentPage < totalPages) { currentPage++; render(); }
+                    });
+
+                    render();
+                })();
+                </script>
+            <% } else { %>
+                <div class="empty">No connections yet.</div>
+            <% } %>
+        </div>
+    </div>
+<% } %>
+</body>
+</html>

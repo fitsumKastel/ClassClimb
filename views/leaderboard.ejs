@@ -1,0 +1,554 @@
+<%- include('partials/header') %>
+<style>body{background-color:#f4f4f5!important;color:#18181b!important}</style>
+
+<div class="flex min-h-screen flex-col bg-zinc-100 text-zinc-900">
+    <div class="mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-4 lg:py-6 lg:w-[30%] lg:min-w-0">
+        <div class="w-full pt-2 sm:pt-4">
+            <% if (typeof isClassTeacher === 'undefined' || !isClassTeacher) { %>
+                <% if (!hasAlerts) { %>
+                    <div class="mb-6 sm:mb-8">
+                        <a
+                            href="/?class_id=<%= classId %>&return=<%= encodeURIComponent('/view/' + classId) %>"
+                            class="inline-flex w-full items-center justify-center rounded-lg border border-blue-600/30 bg-blue-600 px-3 py-2.5 text-center text-sm font-semibold text-white no-underline transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/55 sm:w-auto"
+                        >
+                            Connect Telegram
+                        </a>
+                    </div>
+                <% } %>
+            <% } %>
+
+            <div class="mb-4 flex items-start justify-between gap-3">
+                <div class="flex min-w-0 items-start gap-2.5">
+                    <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                            <path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="break-words text-sm font-bold leading-snug text-zinc-900"><%= footerClassName %></h2>
+                        <% if (footerSchoolName) { %>
+                            <p class="break-words text-xs leading-snug text-zinc-500"><%= footerSchoolName %></p>
+                        <% } %>
+                    </div>
+                </div>
+                <span class="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-600/20">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Live
+                </span>
+            </div>
+            <div
+                id="class-live-announcement"
+                class="mb-4 hidden rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-3 text-sm text-zinc-900 shadow-sm ring-1 ring-blue-500/15"
+                role="status"
+                aria-live="polite"
+            >
+                <div class="flex items-start gap-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-blue-800/80">Class message</p>
+                        <p id="class-live-announcement-body" class="mt-1 whitespace-pre-wrap break-words"></p>
+                    </div>
+                    <button
+                        type="button"
+                        id="class-live-announcement-dismiss"
+                        class="shrink-0 rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+            <div
+                class="cc-ad-slot mb-4 min-h-[5.5rem] rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50"
+                data-ad-slot="leaderboard-top"
+                aria-label="Advertisement"
+            ></div>
+            <div id="leaderboard-list" class="<%= students && students.length > 0 ? 'space-y-1.5' : '' %>">
+                <% if (students && students.length > 0) { %>
+                    <% students.forEach((student, index) => { %>
+                        <% var _rk = index + 1; %>
+                        <% var isTop3 = _rk <= 3; %>
+                        <% var medalColor = _rk === 1 ? 'text-amber-500' : _rk === 2 ? 'text-zinc-400' : _rk === 3 ? 'text-amber-700' : 'text-zinc-400'; %>
+                        <% var rowBg = isTop3 ? 'bg-white ring-1 ring-zinc-200 shadow-sm' : 'bg-white ring-1 ring-zinc-100'; %>
+                        <div
+                            class="flex items-center gap-3 rounded-xl px-3.5 py-3 transition sm:px-4 sm:py-3.5 <%= rowBg %>"
+                            data-student-id="<%= student.id %>"
+                        >
+                            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full <%= isTop3 ? 'bg-gradient-to-b from-amber-50 to-amber-100/60' : 'bg-zinc-100' %>">
+                                <% if (_rk === 1) { %>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                <% } else if (_rk === 2) { %>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                <% } else if (_rk === 3) { %>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-700" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                <% } else { %>
+                                    <span class="text-xs font-bold tabular-nums text-zinc-500"><%= _rk %></span>
+                                <% } %>
+                            </div>
+                            <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+                                <span class="break-words text-sm font-semibold text-zinc-900"><%= student.name %></span>
+                                <div
+                                    class="shrink-0 rounded-full bg-zinc-50 px-2.5 py-1 ring-1 ring-zinc-200/80 transition-[background-color,box-shadow] duration-200 motion-reduce:transition-none"
+                                >
+                                    <span class="inline-block text-xs font-bold tabular-nums text-zinc-600"><%= student.xp %> XP</span>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="rounded-xl bg-white p-6 text-center ring-1 ring-zinc-200">
+                        <p class="text-sm text-zinc-400">No students in this class yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="leaderboard-drawer" class="<%= ccDrawerRoot %>" data-open="false" aria-hidden="true">
+    <button
+        type="button"
+        id="leaderboard-drawer-backdrop"
+        class="<%= ccDrawerBackdrop %>"
+        aria-label="Close menu"
+    ></button>
+    <aside
+        id="leaderboard-drawer-panel"
+        class="<%= ccDrawerPanel %> !bg-white !text-zinc-900"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="leaderboard-drawer-title"
+    >
+        <div
+            class="flex shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-4 pb-3.5"
+            style="padding-top: max(1.5rem, env(safe-area-inset-top, 0px))"
+        >
+            <p id="leaderboard-drawer-title" class="text-sm font-semibold tracking-tight text-zinc-900">Menu</p>
+            <button
+                type="button"
+                id="leaderboard-drawer-close"
+                class="p-2 text-zinc-600 transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/30"
+                aria-label="Close menu"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="min-h-0 flex-1 overflow-y-auto bg-white px-4 pb-6 pt-10">
+            <nav class="flex w-full flex-col items-stretch space-y-8 text-left" aria-label="Leaderboard menu">
+                <section>
+                    <h3 class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Board</h3>
+                    <button type="button" id="leaderboard-refresh-btn" class="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-base font-medium text-zinc-700 transition hover:bg-zinc-100">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 shrink-0 text-zinc-600"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            aria-hidden="true"
+                        >
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                            <path d="M3 21v-5h5" />
+                        </svg>
+                        <span>Refresh</span>
+                    </button>
+                </section>
+                <section>
+                    <h3 class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Account</h3>
+                    <button
+                        type="button"
+                        id="leaderboard-drawer-logout"
+                        class="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-base font-medium text-zinc-700 transition hover:bg-zinc-100"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 shrink-0 text-zinc-600"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            aria-hidden="true"
+                        >
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Log out</span>
+                    </button>
+                </section>
+            </nav>
+        </div>
+    </aside>
+</div>
+
+<script id="leaderboard-initial-state" type="application/json">
+<%- JSON.stringify((students || []).map((s, i) => ({ id: s.id, xp: s.xp, rank: i + 1 }))) %>
+</script>
+<script id="leaderboard-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
+<script src="/js/class-pdf-sync.js"></script>
+
+<script>
+(function () {
+    var classId = '<%= String(classId) %>';
+    var container = document.getElementById('leaderboard-list');
+
+    function wireClassLiveAnnouncementUI() {
+        var wrap = document.getElementById('class-live-announcement');
+        var body = document.getElementById('class-live-announcement-body');
+        var dismiss = document.getElementById('class-live-announcement-dismiss');
+        if (!wrap || !body) {
+            return function () {};
+        }
+        function hideAnnouncement() {
+            wrap.classList.add('hidden');
+            body.textContent = '';
+        }
+        if (dismiss) {
+            dismiss.addEventListener('click', hideAnnouncement);
+        }
+        return function showClassLiveAnnouncement(msg) {
+            if (typeof msg !== 'string') return;
+            var t = msg.trim();
+            if (!t) return;
+            body.textContent = t;
+            wrap.classList.remove('hidden');
+            if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+        };
+    }
+    var showClassLiveAnnouncement = wireClassLiveAnnouncementUI();
+
+    if (!container) return;
+
+    var lastStudentXp = {};
+    var lastStudentRank = {};
+    var leaderboardLive = false;
+
+    function normXp(v) {
+        var n = Math.round(Number(v));
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    try {
+        var bootEl = document.getElementById('leaderboard-initial-state');
+        if (bootEl && bootEl.textContent) {
+            var boot = JSON.parse(bootEl.textContent);
+            if (Array.isArray(boot)) {
+                boot.forEach(function (s) {
+                    var sid = String(s.id != null ? s.id : '');
+                    if (!sid) return;
+                    lastStudentXp[sid] = normXp(s.xp);
+                    var rk = Number(s.rank);
+                    lastStudentRank[sid] = Number.isFinite(rk) && rk > 0 ? rk : 1;
+                });
+                leaderboardLive = true;
+            }
+        }
+    } catch (bootErr) {
+        /* keep defaults */
+    }
+
+    function attachPulseCleanup(row, pulseClass, animName) {
+        function stripPulse() {
+            row.classList.remove(pulseClass, 'motion-reduce:animate-none');
+        }
+        var tid = window.setTimeout(stripPulse, 1400);
+        row.addEventListener(
+            'animationend',
+            function (e) {
+                if (e.target !== row) return;
+                if (e.animationName !== animName) return;
+                window.clearTimeout(tid);
+                stripPulse();
+            },
+            { once: true }
+        );
+    }
+
+    function runXpCountUp(el, fromVal, toVal, durationMs) {
+        var fromN = Math.round(Number(fromVal));
+        var toN = Math.round(Number(toVal));
+        if (!Number.isFinite(fromN)) fromN = toN;
+        if (!Number.isFinite(toN)) {
+            el.textContent = '0 XP';
+            return;
+        }
+        if (fromN === toN) {
+            el.textContent = toN + ' XP';
+            return;
+        }
+        var start = performance.now();
+        function tick(now) {
+            var t = Math.min(1, (now - start) / durationMs);
+            var eased = 1 - (1 - t) * (1 - t);
+            var val = Math.round(fromN + (toN - fromN) * eased);
+            el.textContent = val + ' XP';
+            if (t < 1) requestAnimationFrame(tick);
+            else el.textContent = toN + ' XP';
+        }
+        requestAnimationFrame(tick);
+    }
+
+    var starSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>';
+
+    function renderLeaderboard(students) {
+        container.innerHTML = '';
+        if (!students || !students.length) {
+            container.className = 'rounded-xl bg-white p-6 text-center ring-1 ring-zinc-200';
+            container.innerHTML = '<p class="text-sm text-zinc-400">No students in this class yet.</p>';
+            lastStudentXp = {};
+            lastStudentRank = {};
+            leaderboardLive = true;
+            if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+            return;
+        }
+        container.className = 'space-y-1.5';
+        var nextMap = {};
+        var nextRankMap = {};
+        students.forEach(function (student, index) {
+            var sid = String(student.id != null ? student.id : '');
+            if (!sid) {
+                return;
+            }
+            var prevXp = lastStudentXp[sid];
+            var xpNum = normXp(student.xp);
+            nextMap[sid] = xpNum;
+            var newRank = index + 1;
+            nextRankMap[sid] = newRank;
+            var prevRank = lastStudentRank[sid];
+            var isTop3 = newRank <= 3;
+
+            var row = document.createElement('div');
+            var rowRing = isTop3 ? 'ring-1 ring-zinc-200 shadow-sm' : 'ring-1 ring-zinc-100';
+            row.className = 'flex items-center gap-3 rounded-xl px-3.5 py-3 transition sm:px-4 sm:py-3.5 bg-white ' + rowRing;
+            row.setAttribute('data-student-id', sid);
+
+            var xpWrap = document.createElement('div');
+            xpWrap.className =
+                'shrink-0 rounded-full bg-zinc-50 px-2.5 py-1 ring-1 ring-zinc-200/80 transition-[background-color,box-shadow] duration-200 motion-reduce:transition-none';
+
+            var rowFlashUp = false;
+            var rowFlashDown = false;
+            if (leaderboardLive) {
+                if (prevXp !== undefined && xpNum < normXp(prevXp)) {
+                    rowFlashDown = true;
+                } else {
+                    if (prevRank !== undefined && newRank < prevRank) {
+                        rowFlashUp = true;
+                    } else if (prevXp !== undefined && xpNum > normXp(prevXp)) {
+                        rowFlashUp = true;
+                    }
+                }
+            }
+            if (rowFlashUp) {
+                xpWrap.classList.add('animate-lb-xp-pulse-up', 'motion-reduce:animate-none');
+                attachPulseCleanup(xpWrap, 'animate-lb-xp-pulse-up', 'cc-lb-xp-bg-pulse-up');
+            } else if (rowFlashDown) {
+                xpWrap.classList.add('animate-lb-xp-pulse-down', 'motion-reduce:animate-none');
+                attachPulseCleanup(xpWrap, 'animate-lb-xp-pulse-down', 'cc-lb-xp-bg-pulse-down');
+            }
+
+            var rankBubble = document.createElement('div');
+            var bubbleBg = isTop3 ? 'bg-gradient-to-b from-amber-50 to-amber-100/60' : 'bg-zinc-100';
+            rankBubble.className = 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full ' + bubbleBg;
+            if (newRank === 1) {
+                rankBubble.innerHTML = '<span class="text-amber-500">' + starSvg.replace('class="h-4 w-4"', 'class="h-4 w-4" style="color:inherit"') + '</span>';
+                rankBubble.firstChild.style.color = '#f59e0b';
+            } else if (newRank === 2) {
+                rankBubble.innerHTML = '<span style="color:#a1a1aa">' + starSvg + '</span>';
+            } else if (newRank === 3) {
+                rankBubble.innerHTML = '<span style="color:#b45309">' + starSvg + '</span>';
+            } else {
+                var rkSpan = document.createElement('span');
+                rkSpan.className = 'text-xs font-bold tabular-nums text-zinc-500';
+                rkSpan.textContent = newRank;
+                rankBubble.appendChild(rkSpan);
+            }
+
+            var mid = document.createElement('div');
+            mid.className = 'flex min-w-0 flex-1 items-center justify-between gap-3';
+            var name = document.createElement('span');
+            name.className = 'min-w-0 break-words text-sm font-semibold text-zinc-900';
+            name.textContent = student.name;
+            var xp = document.createElement('span');
+            xp.className = 'inline-block text-xs font-bold tabular-nums text-zinc-600';
+            xp.textContent = student.xp + ' XP';
+
+            if (leaderboardLive && prevXp !== undefined && xpNum !== normXp(prevXp)) {
+                if (xpNum > normXp(prevXp)) {
+                    xp.textContent = normXp(prevXp) + ' XP';
+                    xp.classList.add('animate-cc-lb-xp-gain');
+                    runXpCountUp(xp, normXp(prevXp), xpNum, 550);
+                    window.setTimeout(function () {
+                        xp.classList.remove('animate-cc-lb-xp-gain');
+                    }, 750);
+                } else {
+                    xp.textContent = normXp(prevXp) + ' XP';
+                    xp.classList.add('animate-cc-lb-xp-loss');
+                    runXpCountUp(xp, normXp(prevXp), xpNum, 550);
+                    window.setTimeout(function () {
+                        xp.classList.remove('animate-cc-lb-xp-loss');
+                    }, 750);
+                }
+            }
+            xpWrap.appendChild(xp);
+            mid.appendChild(name);
+            mid.appendChild(xpWrap);
+            row.appendChild(rankBubble);
+            row.appendChild(mid);
+            container.appendChild(row);
+        });
+        lastStudentXp = nextMap;
+        lastStudentRank = nextRankMap;
+        leaderboardLive = true;
+        if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+    }
+
+    var proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var wsUrl = proto + '//' + window.location.host + '/ws?classId=' + encodeURIComponent(classId);
+    var reconnectTimer;
+    var ws;
+    var leaderboardPdfCtl = null;
+
+    function connect() {
+        try {
+            ws = new WebSocket(wsUrl);
+        } catch (e) {
+            scheduleReconnect();
+            return;
+        }
+        ws.onopen = function () {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+        };
+        ws.onmessage = function (ev) {
+            try {
+                var data = JSON.parse(ev.data);
+                if (data.type === 'leaderboard' && Array.isArray(data.students)) {
+                    renderLeaderboard(data.students);
+                } else if (data.type === 'announcement' && typeof data.message === 'string') {
+                    showClassLiveAnnouncement(data.message);
+                } else if (data.type === 'pdf_sync' && leaderboardPdfCtl) {
+                    leaderboardPdfCtl.onPdfSyncMessage(data);
+                }
+            } catch (err) {
+                /* ignore */
+            }
+        };
+        ws.onclose = function () {
+            scheduleReconnect();
+        };
+        ws.onerror = function () {
+            try {
+                ws.close();
+            } catch (e) {}
+        };
+    }
+
+    function scheduleReconnect() {
+        if (reconnectTimer) return;
+        reconnectTimer = window.setTimeout(function () {
+            reconnectTimer = null;
+            connect();
+        }, 2500);
+    }
+
+    var bootPdfLb = {};
+    try {
+        var pbl = document.getElementById('leaderboard-pdf-bootstrap');
+        if (pbl && pbl.textContent) bootPdfLb = JSON.parse(pbl.textContent);
+    } catch (lbPdfErr) {
+        bootPdfLb = {};
+    }
+    if (typeof ClassPdfSync !== 'undefined' && container && container.parentElement) {
+        ClassPdfSync.initLeaderboard({
+            classId: classId,
+            bootstrap: bootPdfLb,
+            leaderboardRoot: container.parentElement,
+            listContainer: container
+        }).then(function (ctl) {
+            leaderboardPdfCtl = ctl;
+            connect();
+        });
+    } else {
+        connect();
+    }
+})();
+</script>
+
+<script>
+(function () {
+    var drawer = document.getElementById('leaderboard-drawer');
+    var openBtn = document.getElementById('leaderboard-menu-btn');
+    var closeBtn = document.getElementById('leaderboard-drawer-close');
+    var backdrop = document.getElementById('leaderboard-drawer-backdrop');
+    var refreshBtn = document.getElementById('leaderboard-refresh-btn');
+    var drawerLogoutBtn = document.getElementById('leaderboard-drawer-logout');
+    var logoutModal = document.getElementById('cc-logout-modal');
+
+    if (!drawer || !openBtn) return;
+
+    function drawerIsOpen() {
+        return drawer.getAttribute('data-open') === 'true';
+    }
+
+    function openDrawer() {
+        drawer.setAttribute('data-open', 'true');
+        drawer.setAttribute('aria-hidden', 'false');
+        openBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        ccTailwindRefresh();
+    }
+
+    function closeDrawer() {
+        drawer.setAttribute('data-open', 'false');
+        drawer.setAttribute('aria-hidden', 'true');
+        openBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        ccTailwindRefresh();
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+            closeDrawer();
+            window.location.reload();
+        });
+    }
+
+    if (drawerLogoutBtn) {
+        drawerLogoutBtn.addEventListener('click', function () {
+            closeDrawer();
+            window.setTimeout(function () {
+                var o = document.getElementById('cc-logout-open');
+                if (o) o.click();
+            }, 0);
+        });
+    }
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape' || !drawerIsOpen()) return;
+        if (logoutModal && !logoutModal.classList.contains('hidden')) return;
+        closeDrawer();
+    });
+})();
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassClimb</title>
+    <link rel="icon" href="/asset/xp.png" type="image/png">
+    <link rel="apple-touch-icon" href="/asset/xp.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,700&display=swap"
+        rel="stylesheet"
+    />
+    <style>
+        html {
+            font-size: 15px;
+        }
+        html,
+        body,
+        button,
+        input,
+        textarea,
+        select {
+            font-family: 'Noto Sans', sans-serif;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans"', 'sans-serif'],
+                        mono: ['"Noto Sans"', 'sans-serif']
+                    },
+                    fontSize: {
+                        xs: ['0.7333rem', { lineHeight: '1rem' }],
+                        sm: ['0.8667rem', { lineHeight: '1.25rem' }],
+                        base: ['1rem', { lineHeight: '1.5rem' }],
+                        lg: ['1rem', { lineHeight: '1.5rem' }],
+                        xl: ['1rem', { lineHeight: '1.5rem' }],
+                        '2xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '3xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '4xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '5xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '6xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '7xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '8xl': ['1rem', { lineHeight: '1.5rem' }],
+                        '9xl': ['1rem', { lineHeight: '1.5rem' }]
+                    },
+                    colors: {
+                        'pure-black': '#000000',
+                        'card-dark': '#111111'
+                    },
+                    keyframes: {
+                        'cc-lb-xp-bg-pulse-up': {
+                            '0%': {
+                                backgroundColor: 'rgba(21, 128, 61, 0.55)',
+                                boxShadow:
+                                    '0 0 0 1px rgba(74, 222, 128, 0.55), 0 0 20px rgba(74, 222, 128, 0.25)'
+                            },
+                            '100%': {
+                                backgroundColor: 'transparent',
+                                boxShadow: '0 0 0 1px rgb(63 63 70)'
+                            }
+                        },
+                        'cc-lb-xp-bg-pulse-down': {
+                            '0%': {
+                                backgroundColor: 'rgba(159, 18, 57, 0.5)',
+                                boxShadow:
+                                    '0 0 0 1px rgba(251, 113, 133, 0.5), 0 0 18px rgba(251, 113, 133, 0.22)'
+                            },
+                            '100%': {
+                                backgroundColor: 'transparent',
+                                boxShadow: '0 0 0 1px rgb(63 63 70)'
+                            }
+                        },
+                        'cc-lb-xp-gain': {
+                            '0%': {
+                                color: '#4ade80',
+                                transform: 'scale(1.14)',
+                                textShadow:
+                                    '0 0 14px rgba(74, 222, 128, 0.55), 0 0 28px rgba(74, 222, 128, 0.2)'
+                            },
+                            '55%': {
+                                color: '#bbf7d0',
+                                transform: 'scale(1.06)',
+                                textShadow: '0 0 10px rgba(74, 222, 128, 0.35)'
+                            },
+                            '100%': { color: '#ffffff', transform: 'scale(1)', textShadow: 'none' }
+                        },
+                        'cc-lb-xp-loss': {
+                            '0%': {
+                                color: '#fb7185',
+                                transform: 'scale(1.1)',
+                                textShadow:
+                                    '0 0 14px rgba(251, 113, 133, 0.5), 0 0 24px rgba(251, 113, 133, 0.18)'
+                            },
+                            '55%': {
+                                color: '#fecdd3',
+                                transform: 'scale(1.04)',
+                                textShadow: '0 0 10px rgba(251, 113, 133, 0.3)'
+                            },
+                            '100%': { color: '#ffffff', transform: 'scale(1)', textShadow: 'none' }
+                        }
+                    },
+                    animation: {
+                        'lb-xp-pulse-up': 'cc-lb-xp-bg-pulse-up 1.2s ease-out forwards',
+                        'lb-xp-pulse-down': 'cc-lb-xp-bg-pulse-down 1.2s ease-out forwards',
+                        'cc-lb-xp-gain': 'cc-lb-xp-gain 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+                        'cc-lb-xp-loss': 'cc-lb-xp-loss 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards'
+                    }
+                }
+            }
+        };
+        function ccTailwindRefresh() {
+            try {
+                if (typeof tailwind !== 'undefined' && typeof tailwind.refresh === 'function') {
+                    tailwind.refresh();
+                }
+            } catch (e) {}
+        }
+    </script>
+</head>
+<body class="select-none bg-pure-black font-sans text-base text-white antialiased">
+<%- include('nav') %>

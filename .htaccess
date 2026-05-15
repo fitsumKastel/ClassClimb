@@ -1,0 +1,8 @@
+# Node.js / Passenger (cPanel, CloudLinux)
+# This file must exist so the host’s Node selector can start/stop the app without FileNotFoundError.
+# If your app path differs from the folder that contains this file, set PassengerAppRoot explicitly
+# (see cPanel → Setup Node.js Application → your app’s “Application URL” directory).
+
+PassengerEnabled on
+PassengerAppType node
+PassengerStartupFile server.js

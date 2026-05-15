@@ -1,0 +1,369 @@
+<% var signedIn = typeof userId !== 'undefined' && userId; %>
+<% var studentNav = typeof navStudentView !== 'undefined' && navStudentView; %>
+<% var onManage = typeof currentPath === 'string' && currentPath.indexOf('/class/manage/') === 0; %>
+<% var showLeaderboardMenu = studentNav && signedIn; %>
+<% var showClassToolsMenu = onManage; %>
+<% var showAccountDrawer = signedIn && !showLeaderboardMenu && !onManage; %>
+<% var navBackHref = locals.headerBackHref || null; %>
+<% var navBackLabel = locals.headerBackLabel || 'Back'; %>
+<% var navEyebrow = locals.headerEyebrow || null; %>
+<% var navTitle = locals.headerTitle || null; %>
+<% var navSubtitle = locals.headerSubtitle || null; %>
+<% var showHeaderContext = Boolean((navEyebrow || navTitle || navSubtitle) && !onManage && !studentNav); %>
+<% var menuBtnClass = studentNav
+    ? 'inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-300 bg-white p-2 text-zinc-600 transition hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40'
+    : 'inline-flex shrink-0 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900/90 p-2 text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40'; %>
+<header class="sticky top-0 z-30 border-b <%= studentNav ? 'border-zinc-200 bg-zinc-100/95' : 'border-zinc-800 bg-pure-black/95' %> backdrop-blur-sm">
+    <nav class="mx-auto max-w-5xl px-4 pt-3 pb-3" aria-label="Primary">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                <% if (navBackHref) { %>
+                    <a
+                        href="<%= navBackHref %>"
+                        class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg <%= studentNav ? 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white' %> transition"
+                        aria-label="<%= navBackLabel %>"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                    </a>
+                <% } %>
+                <a href="/" class="shrink-0 text-base font-black italic tracking-tight <%= studentNav ? 'text-zinc-900 hover:text-zinc-600' : 'text-white hover:text-zinc-300' %> transition">CLASSCLIMB</a>
+            </div>
+            <div class="flex shrink-0 items-center justify-end">
+                <% var onAuthPage = typeof currentPath === 'string' && currentPath.indexOf('/auth/') === 0; %>
+                <% if (signedIn) { %>
+                    <div
+                        role="navigation"
+                        aria-label="Account"
+                        class="flex items-center gap-2 sm:gap-3"
+                    >
+                        <% if (showAccountDrawer) { %>
+                            <span class="hidden max-w-[9rem] truncate text-xs text-zinc-500 sm:inline" title="Signed in">Signed in</span>
+                        <% } %>
+                        <% if (showLeaderboardMenu) { %>
+                            <button
+                                type="button"
+                                id="leaderboard-menu-btn"
+                                class="<%= menuBtnClass %>"
+                                aria-expanded="false"
+                                aria-controls="leaderboard-drawer-panel"
+                                aria-label="Open menu"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        <% } %>
+                        <% if (showAccountDrawer) { %>
+                            <button
+                                type="button"
+                                id="app-menu-btn"
+                                class="<%= menuBtnClass %>"
+                                aria-expanded="false"
+                                aria-controls="app-menu-drawer-panel"
+                                aria-label="Open menu"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        <% } %>
+                        <% if (showClassToolsMenu) { %>
+                            <button
+                                type="button"
+                                id="class-manage-menu-btn"
+                                class="<%= menuBtnClass %>"
+                                aria-expanded="false"
+                                aria-controls="class-manage-drawer-panel"
+                                aria-label="Open class tools"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        <% } %>
+                    </div>
+                <% } else if (!onAuthPage) { %>
+                    <div
+                        role="navigation"
+                        aria-label="Account"
+                        class="flex items-center rounded-xl border border-zinc-800/80 bg-zinc-950/80 px-3 py-1.5"
+                    >
+                        <a href="/" class="text-sm font-medium text-zinc-300 transition hover:text-white">Sign in</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+        <% if (showHeaderContext) { %>
+            <div class="mt-3 min-w-0 border-t border-zinc-800/80 pt-3">
+                <% if (navEyebrow) { %>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500"><%= navEyebrow %></p>
+                <% } %>
+                <% if (navTitle) { %>
+                    <p class="mt-0.5 truncate text-base font-semibold text-white"><%= navTitle %></p>
+                <% } %>
+                <% if (navSubtitle) { %>
+                    <p class="mt-0.5 truncate text-sm text-zinc-500"><%= navSubtitle %></p>
+                <% } %>
+            </div>
+        <% } %>
+    </nav>
+</header>
+
+<% if (signedIn) { %>
+    <form id="cc-logout-form" action="/auth/logout" method="POST" autocomplete="off">
+        <button
+            type="button"
+            id="cc-logout-open"
+            class="sr-only"
+            aria-haspopup="dialog"
+            aria-controls="cc-logout-modal"
+        >
+            Log out
+        </button>
+    </form>
+<% } %>
+
+<% if (showAccountDrawer) { %>
+<div id="app-menu-drawer" class="<%= ccDrawerRoot %>" data-open="false" aria-hidden="true">
+    <button
+        type="button"
+        id="app-menu-drawer-backdrop"
+        class="<%= ccDrawerBackdrop %>"
+        aria-label="Close menu"
+    ></button>
+    <aside
+        id="app-menu-drawer-panel"
+        class="<%= ccDrawerPanel %>"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="app-menu-drawer-title"
+    >
+        <div
+            class="flex shrink-0 items-center justify-between border-b border-zinc-800 px-4 pb-3.5"
+            style="background-color: #000000; padding-top: max(1.5rem, env(safe-area-inset-top, 0px))"
+        >
+            <p id="app-menu-drawer-title" class="text-sm font-semibold tracking-tight text-white">Menu</p>
+            <button
+                type="button"
+                id="app-menu-drawer-close"
+                class="p-2 text-white transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                aria-label="Close menu"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-10" style="background-color: #000000">
+            <nav class="flex w-full flex-col items-stretch space-y-8 text-left" aria-label="Account menu">
+                <section>
+                    <h3 class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Account</h3>
+                    <button type="button" id="app-menu-drawer-logout" class="<%= ccDrawerNavItem %>">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 shrink-0 opacity-90"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            aria-hidden="true"
+                        >
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Log out</span>
+                    </button>
+                </section>
+            </nav>
+        </div>
+    </aside>
+</div>
+
+<script>
+(function () {
+    var drawer = document.getElementById('app-menu-drawer');
+    var openBtn = document.getElementById('app-menu-btn');
+    var closeBtn = document.getElementById('app-menu-drawer-close');
+    var backdrop = document.getElementById('app-menu-drawer-backdrop');
+    var drawerLogoutBtn = document.getElementById('app-menu-drawer-logout');
+    var logoutModal = document.getElementById('cc-logout-modal');
+
+    if (!drawer || !openBtn) return;
+
+    function drawerIsOpen() {
+        return drawer.getAttribute('data-open') === 'true';
+    }
+
+    function openDrawer() {
+        drawer.setAttribute('data-open', 'true');
+        drawer.setAttribute('aria-hidden', 'false');
+        openBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        ccTailwindRefresh();
+    }
+
+    function closeDrawer() {
+        drawer.setAttribute('data-open', 'false');
+        drawer.setAttribute('aria-hidden', 'true');
+        openBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        ccTailwindRefresh();
+    }
+
+    openBtn.addEventListener('click', openDrawer);
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    if (drawerLogoutBtn) {
+        drawerLogoutBtn.addEventListener('click', function () {
+            closeDrawer();
+            window.setTimeout(function () {
+                var o = document.getElementById('cc-logout-open');
+                if (o) o.click();
+            }, 0);
+        });
+    }
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape' || !drawerIsOpen()) return;
+        if (logoutModal && !logoutModal.classList.contains('hidden')) return;
+        closeDrawer();
+    });
+})();
+</script>
+<% } %>
+
+<div
+    id="cc-logout-modal"
+    class="fixed inset-0 z-[200] hidden items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cc-logout-modal-title"
+    aria-hidden="true"
+>
+    <button
+        type="button"
+        id="cc-logout-modal-backdrop"
+        class="absolute inset-0 bg-black/75"
+        aria-label="Close dialog"
+    ></button>
+    <div class="relative z-10 w-full max-w-sm rounded-2xl border border-zinc-700/80 bg-[#141414] p-6 shadow-2xl shadow-black/50">
+        <h2 id="cc-logout-modal-title" class="text-base font-semibold text-white">Log out?</h2>
+        <p class="mt-2 text-sm leading-relaxed text-zinc-400">Are you sure you want to log out? You can sign in again anytime.</p>
+        <div class="mt-6 flex flex-wrap justify-end gap-3">
+            <button
+                type="button"
+                id="cc-logout-cancel"
+                class="rounded-lg border border-zinc-600 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-800/80"
+            >
+                Cancel
+            </button>
+            <button
+                type="button"
+                id="cc-logout-confirm"
+                class="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500"
+            >
+                Log out
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('cc-logout-form');
+    var openBtn = document.getElementById('cc-logout-open');
+    var modal = document.getElementById('cc-logout-modal');
+    if (!form || !openBtn || !modal) return;
+
+    var backdrop = document.getElementById('cc-logout-modal-backdrop');
+    var cancelBtn = document.getElementById('cc-logout-cancel');
+    var confirmBtn = document.getElementById('cc-logout-confirm');
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (cancelBtn) cancelBtn.focus();
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        var menuBtn =
+            document.getElementById('leaderboard-menu-btn') ||
+            document.getElementById('class-manage-menu-btn') ||
+            document.getElementById('app-menu-btn');
+        if (menuBtn) menuBtn.focus();
+        else openBtn.focus();
+    }
+
+    openBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal();
+    });
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function () {
+            form.submit();
+        });
+    }
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+})();
+</script>

@@ -1,0 +1,641 @@
+<%- include('partials/header') %>
+
+<% var guestLanding = typeof signedIn !== 'undefined' && !signedIn; %>
+<div class="bg-[#000] text-white flex flex-col items-center px-3 sm:px-4 <%= guestLanding ? 'min-h-[calc(100svh-4rem)] py-6 sm:py-8' : 'min-h-screen justify-start py-4 lg:py-6' %>">
+    <div class="w-full lg:w-[30%] lg:min-w-0 <%= guestLanding ? 'my-auto' : '' %>">
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div
+                id="cc-error-modal"
+                class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="cc-error-modal-title"
+            >
+                <div class="absolute inset-0 bg-black/70" id="cc-error-modal-backdrop"></div>
+                <div class="relative z-10 w-full max-w-sm rounded-2xl border border-zinc-700/80 bg-[#141414] p-6 shadow-2xl shadow-black/50">
+                    <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-500/15">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                    </div>
+                    <h2 id="cc-error-modal-title" class="text-base font-semibold text-white">Something went wrong</h2>
+                    <p class="mt-2 text-sm leading-relaxed text-zinc-400"><%= error %></p>
+                    <div class="mt-5">
+                        <button
+                            type="button"
+                            id="cc-error-modal-close"
+                            class="w-full rounded-lg bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-zinc-700"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <script>
+            (function () {
+                var modal = document.getElementById('cc-error-modal');
+                var backdrop = document.getElementById('cc-error-modal-backdrop');
+                var closeBtn = document.getElementById('cc-error-modal-close');
+                if (!modal) return;
+                function close() {
+                    modal.remove();
+                    var url = new URL(window.location);
+                    url.searchParams.delete('error');
+                    window.history.replaceState(null, '', url.pathname + url.search);
+                }
+                if (closeBtn) closeBtn.addEventListener('click', close);
+                if (backdrop) backdrop.addEventListener('click', close);
+                document.addEventListener('keydown', function (ev) {
+                    if (ev.key === 'Escape' && document.getElementById('cc-error-modal')) close();
+                });
+            })();
+            </script>
+        <% } %>
+        <!-- Logo/Header -->
+        <div class="text-center mb-8 sm:mb-12">
+            <img
+                src="/asset/xp.png"
+                alt="ClassClimb logo"
+                width="120"
+                height="120"
+                class="mx-auto h-20 w-auto max-h-28 max-w-[min(100%,280px)] object-contain sm:h-28"
+                decoding="async"
+            />
+            <h1 class="mt-4 text-base font-black tracking-tighter italic">CLASSCLIMB</h1>
+            <p class="text-gray-500 mt-2">Elevate your classroom engagement.</p>
+        </div>
+
+        <% if (typeof signedIn !== 'undefined' && !signedIn) { %>
+            <div class="bg-[#111] p-4 sm:p-6 rounded-2xl border border-gray-900 mb-6">
+                <button
+                    type="button"
+                    id="tg-open-btn"
+                    data-open-url="<%= (typeof pendingLogin !== 'undefined' && pendingLogin && typeof openBotUrl === 'string' && openBotUrl) ? openBotUrl : '' %>"
+                    data-pending-link-id="<%= typeof pendingLinkId !== 'undefined' && pendingLinkId ? pendingLinkId : '' %>"
+                    data-prepare-return="<%= typeof prepareReturn !== 'undefined' ? prepareReturn : '' %>"
+                    data-prepare-class-id="<%= typeof prepareClassId !== 'undefined' ? prepareClassId : '' %>"
+                    class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-lg transition text-white"
+                >
+                    Open Telegram
+                </button>
+                <form id="tg-finish-form" action="/auth/complete" method="POST" class="hidden w-full mt-0" autocomplete="off">
+                    <% if (typeof pendingLinkId !== 'undefined' && pendingLinkId) { %>
+                        <input type="hidden" name="link_id" id="tg-link-id-input" value="<%= pendingLinkId %>" />
+                    <% } %>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-lg transition text-white"
+                    >
+                        Finish
+                    </button>
+                </form>
+                <p id="tg-again-wrap" class="hidden mt-4 text-center">
+                    <button
+                        type="button"
+                        id="tg-again-btn"
+                        class="inline cursor-pointer border-0 bg-transparent p-0 text-xs font-inherit text-zinc-400 shadow-none [font:inherit] underline decoration-zinc-600 underline-offset-[0.2em] hover:text-zinc-200 focus:outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-blue-500/55"
+                    >
+                        Open Telegram again
+                    </button>
+                </p>
+                <script src="/js/telegram-login.js" defer></script>
+                <% if (typeof pendingLogin === 'undefined' || !pendingLogin) { %>
+                    <script>try { sessionStorage.removeItem('classclimb_tg_opened'); } catch (e) {}</script>
+                <% } %>
+            </div>
+        <% } else if (typeof isTeacher !== 'undefined' && isTeacher) { %>
+
+        <!-- Teacher: create class -->
+        <section
+            class="relative mb-6 overflow-hidden rounded-2xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/50 to-[#0a0a0a] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
+            aria-labelledby="teacher-create-heading"
+        >
+            <div class="pointer-events-none absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500 opacity-90" aria-hidden="true"></div>
+            <div class="p-5 sm:p-6">
+                <div class="mb-5 flex items-center gap-3">
+                    <span
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-400"
+                        aria-hidden="true"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                    </span>
+                    <div class="min-w-0">
+                        <h2 id="teacher-create-heading" class="text-base font-semibold tracking-tight text-white">Create a class</h2>
+                    </div>
+                </div>
+                <p id="create-class-error" class="mb-4 hidden rounded-xl border border-red-900/45 bg-red-950/35 px-3 py-2.5 text-sm text-red-200"></p>
+                <form id="create-class-form" action="/class/create" method="POST" class="space-y-4" autocomplete="off">
+                    <input type="hidden" name="_formNonce" value="<%= formNonce %>">
+                    <div class="space-y-1.5">
+                        <label for="create-class-name" class="text-xs font-medium uppercase tracking-wide text-zinc-500">Class name</label>
+                        <input
+                            id="create-class-name"
+                            type="text"
+                            name="className"
+                            placeholder="e.g. 10B Math"
+                            required
+                            autocomplete="off"
+                            class="w-full select-text rounded-xl border border-zinc-800 bg-black/50 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
+                        />
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="create-school-name" class="text-xs font-medium uppercase tracking-wide text-zinc-500">School</label>
+                        <input
+                            id="create-school-name"
+                            type="text"
+                            name="schoolName"
+                            placeholder="School name"
+                            required
+                            autocomplete="off"
+                            class="w-full select-text rounded-xl border border-zinc-800 bg-black/50 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
+                        />
+                    </div>
+                    <button
+                        id="create-class-submit"
+                        type="submit"
+                        class="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/25 transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 active:scale-[0.99]"
+                    >
+                        Create class
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Teacher: class list -->
+        <section
+            id="class-list-section"
+            class="mb-6 rounded-xl border border-zinc-800/90 bg-[#0a0a0a] px-3 py-4 sm:px-4"
+            data-page="<%= typeof classesPage !== 'undefined' ? classesPage : 1 %>"
+            data-total-pages="<%= typeof classesTotalPages !== 'undefined' ? classesTotalPages : 1 %>"
+            data-page-size="<%= typeof classesPageSize !== 'undefined' ? classesPageSize : 10 %>"
+            aria-labelledby="your-classes-heading"
+        >
+            <div class="mb-3 flex flex-wrap items-center gap-3">
+                <h2 id="your-classes-heading" class="text-base font-semibold tracking-tight text-white">Your classes</h2>
+                <% if (typeof classesTotalCount !== 'undefined' && classesTotalCount > 0) { %>
+                    <span class="shrink-0 rounded-full border border-zinc-700/80 bg-zinc-900/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-400"><%= classesTotalCount %></span>
+                <% } %>
+            </div>
+            <div id="class-list" class="space-y-2">
+                <% if (classes && classes.length > 0) { %>
+                    <% classes.forEach((classItem) => { %>
+                        <article class="class-card flex items-center gap-2 rounded-xl border border-zinc-800/80 bg-zinc-950/30 px-2.5 py-2.5 transition hover:border-zinc-700/80 sm:gap-3 sm:px-3" data-class-view-id="<%= classItem.view_id %>">
+                            <div class="min-w-0 flex-1">
+                                <h3 class="truncate text-base font-semibold leading-snug text-white"><%= classItem.class_name %></h3>
+                                <% if (classItem.school_name) { %>
+                                    <p class="truncate text-xs text-zinc-500"><%= classItem.school_name %></p>
+                                <% } %>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-0.5">
+                                <a
+                                    href="/class/manage/<%= classItem.view_id %>"
+                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-400 no-underline transition hover:bg-blue-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                                    aria-label="Manage class"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect width="7" height="7" x="3" y="3" rx="1" />
+                                        <rect width="7" height="7" x="14" y="3" rx="1" />
+                                        <rect width="7" height="7" x="14" y="14" rx="1" />
+                                        <rect width="7" height="7" x="3" y="14" rx="1" />
+                                    </svg>
+                                </a>
+                                <button
+                                    type="button"
+                                    class="copy-class-link inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-400 transition hover:bg-blue-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                                    data-copy-class-id="<%= classItem.id %>"
+                                    aria-label="Copy student link"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                    </svg>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="delete-class-trigger inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-900/80 hover:text-zinc-500"
+                                    data-view-id="<%= classItem.view_id %>"
+                                    data-class-name="<%= classItem.class_name %>"
+                                    aria-label="Delete class"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M3 6h18" />
+                                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
+                                        <path d="M10 11v6M14 11v6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </article>
+                    <% }) %>
+                <% } else { %>
+                    <p id="class-list-empty" class="rounded-lg border border-dashed border-zinc-800 py-8 text-center text-sm text-zinc-500">
+                        No classes yet. Add one above.
+                    </p>
+                <% } %>
+            </div>
+            <% if (typeof classesTotalPages !== 'undefined' && classesTotalPages > 1) { %>
+                <nav class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800/80 pt-3 text-sm" aria-label="Class list pages">
+                    <% if (classesPage > 1) { %>
+                        <a
+                            href="/?page=<%= classesPage - 1 %>"
+                            class="rounded-xl border border-zinc-700 bg-zinc-900/50 px-4 py-2 font-medium text-zinc-200 transition hover:border-blue-500/40 hover:text-white"
+                        >
+                            Previous
+                        </a>
+                    <% } else { %>
+                        <span class="rounded-xl border border-transparent px-4 py-2 text-zinc-600">Previous</span>
+                    <% } %>
+                    <span class="text-xs font-medium tabular-nums text-zinc-500">Page <%= classesPage %> / <%= classesTotalPages %></span>
+                    <% if (classesPage < classesTotalPages) { %>
+                        <a
+                            href="/?page=<%= classesPage + 1 %>"
+                            class="rounded-xl border border-zinc-700 bg-zinc-900/50 px-4 py-2 font-medium text-zinc-200 transition hover:border-blue-500/40 hover:text-white"
+                        >
+                            Next
+                        </a>
+                    <% } else { %>
+                        <span class="rounded-xl border border-transparent px-4 py-2 text-zinc-600">Next</span>
+                    <% } %>
+                </nav>
+            <% } %>
+        </section>
+
+        <div
+            id="delete-class-modal"
+            class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-class-modal-title"
+            aria-hidden="true"
+        >
+            <button
+                type="button"
+                id="delete-class-modal-backdrop"
+                class="absolute inset-0 bg-black/80 backdrop-blur-[2px]"
+                aria-label="Close dialog"
+            ></button>
+            <div class="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-zinc-800 bg-[#0c0c0c] shadow-2xl shadow-black/50">
+                <div class="border-b border-zinc-800/90 bg-zinc-900/40 px-5 py-4">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/15 text-red-400" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z" />
+                                <path d="M10 11v6M14 11v6" />
+                            </svg>
+                        </span>
+                        <h3 id="delete-class-modal-title" class="text-base font-semibold text-white">Delete this class?</h3>
+                    </div>
+                </div>
+                <div class="px-5 py-4">
+                    <p id="delete-class-modal-text" class="text-sm leading-relaxed text-zinc-400"></p>
+                    <p id="delete-class-modal-error" class="mt-3 hidden text-sm text-red-400"></p>
+                    <div class="mt-4 rounded-xl border border-amber-900/40 bg-amber-950/25 px-3 py-2.5 text-xs leading-snug text-amber-200/90">
+                        Removes all students, XP, and Telegram subscriptions. This cannot be undone.
+                    </div>
+                </div>
+                <div class="flex flex-wrap justify-end gap-2 border-t border-zinc-800/90 bg-black/30 px-5 py-4">
+                    <button
+                        type="button"
+                        id="delete-class-cancel"
+                        class="rounded-xl border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-zinc-500 hover:bg-zinc-900/80 hover:text-white"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        id="delete-class-confirm"
+                        class="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-900/20 transition hover:bg-red-500 disabled:opacity-50"
+                    >
+                        Delete class
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <% } else { %>
+        <!-- Signed-in student home (no teacher tools) -->
+        <section
+            class="mb-6 rounded-xl border border-zinc-800/90 bg-[#0a0a0a] px-3 py-4 sm:px-4"
+            aria-labelledby="your-boards-heading"
+        >
+            <div class="mb-3 flex items-center gap-3">
+                <h2 id="your-boards-heading" class="text-base font-semibold tracking-tight text-white">Your boards</h2>
+                <% var boards = typeof studentBoards !== 'undefined' && studentBoards ? studentBoards : []; %>
+                <% if (boards.length > 0) { %>
+                    <span class="shrink-0 rounded-full border border-zinc-700/80 bg-zinc-900/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-400"><%= boards.length %></span>
+                <% } %>
+            </div>
+            <% if (boards.length > 0) { %>
+                <div class="grid grid-cols-2 gap-2">
+                    <% boards.forEach(function (b) { %>
+                        <a
+                            href="/view/<%= b.id %>"
+                            class="flex w-full flex-col items-start justify-center rounded-xl border border-zinc-800/80 bg-zinc-950/30 px-3 py-3.5 no-underline transition hover:border-zinc-600 hover:bg-zinc-900/50 active:scale-[0.98]"
+                        >
+                            <span class="w-full truncate text-sm font-semibold text-white"><%= b.class_name %></span>
+                            <% if (b.school_name) { %>
+                                <span class="mt-0.5 w-full truncate text-xs text-zinc-500"><%= b.school_name %></span>
+                            <% } %>
+                        </a>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p class="rounded-lg border border-dashed border-zinc-800 py-8 text-center text-sm text-zinc-500">
+                    No boards yet. Open a link from your teacher while signed in.
+                </p>
+            <% } %>
+        </section>
+
+        <% } %>
+    </div>
+</div>
+
+
+
+<% if (typeof signedIn !== 'undefined' && signedIn && typeof isTeacher !== 'undefined' && isTeacher) { %>
+<script>try { sessionStorage.removeItem('classclimb_tg_opened'); } catch (e) {}</script>
+<script>
+async function copyLink(id) {
+    var url = window.location.origin + '/view/' + id;
+    try {
+        await navigator.clipboard.writeText(url);
+    } catch (e) {
+        /* silent; clipboard may be denied without permission */
+    }
+}
+
+function appendClassCard(c) {
+    var list = document.getElementById('class-list');
+    if (!list) return;
+    var empty = document.getElementById('class-list-empty');
+    if (empty) empty.remove();
+
+    var card = document.createElement('article');
+    card.className =
+        'class-card flex items-center gap-2 rounded-xl border border-zinc-800/80 bg-zinc-950/30 px-2.5 py-2.5 transition hover:border-zinc-700/80 sm:gap-3 sm:px-3';
+    card.setAttribute('data-class-view-id', c.view_id);
+
+    var titleBlock = document.createElement('div');
+    titleBlock.className = 'min-w-0 flex-1';
+
+    var title = document.createElement('h3');
+    title.className = 'truncate text-base font-semibold leading-snug text-white';
+    title.textContent = c.class_name;
+    titleBlock.appendChild(title);
+
+    var school = c.school_name != null ? String(c.school_name).trim() : '';
+    if (school) {
+        var schoolEl = document.createElement('p');
+        schoolEl.className = 'truncate text-xs text-zinc-500';
+        schoolEl.textContent = school;
+        titleBlock.appendChild(schoolEl);
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'flex shrink-0 items-center gap-0.5';
+
+    var manage = document.createElement('a');
+    manage.href = '/class/manage/' + encodeURIComponent(c.view_id);
+    manage.className =
+        'inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-400 no-underline transition hover:bg-blue-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40';
+    manage.setAttribute('aria-label', 'Manage class');
+    manage.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>';
+
+    var copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className =
+        'copy-class-link inline-flex h-9 w-9 items-center justify-center rounded-lg text-blue-400 transition hover:bg-blue-500/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40';
+    copyBtn.setAttribute('data-copy-class-id', String(c.id));
+    copyBtn.setAttribute('aria-label', 'Copy student link');
+    copyBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className =
+        'delete-class-trigger inline-flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-900/80 hover:text-zinc-500';
+    delBtn.setAttribute('data-view-id', c.view_id);
+    delBtn.setAttribute('data-class-name', c.class_name);
+    delBtn.setAttribute('aria-label', 'Delete class');
+    delBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-[1.125rem] w-[1.125rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/><path d="M10 11v6M14 11v6"/></svg>';
+
+    actions.appendChild(manage);
+    actions.appendChild(copyBtn);
+    actions.appendChild(delBtn);
+
+    card.appendChild(titleBlock);
+    card.appendChild(actions);
+    var firstEl = list.firstElementChild;
+    if (firstEl) {
+        list.insertBefore(card, firstEl);
+    } else {
+        list.appendChild(card);
+    }
+    if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+
+    var section = document.getElementById('class-list-section');
+    var ps = section ? parseInt(section.getAttribute('data-page-size') || '10', 10) : 10;
+    while (list.querySelectorAll('.class-card').length > ps) {
+        var cards = list.querySelectorAll('.class-card');
+        var last = cards[cards.length - 1];
+        if (last) last.remove();
+    }
+}
+
+(function () {
+    var list = document.getElementById('class-list');
+    if (list) {
+        list.addEventListener('click', function (ev) {
+            var delTrig = ev.target.closest('.delete-class-trigger');
+            if (delTrig && list.contains(delTrig)) {
+                var vid = delTrig.getAttribute('data-view-id');
+                var cname = delTrig.getAttribute('data-class-name') || '';
+                if (vid) openDeleteClassModal(vid, cname);
+                return;
+            }
+            var btn = ev.target.closest('.copy-class-link');
+            if (!btn || !list.contains(btn)) return;
+            var id = btn.getAttribute('data-copy-class-id');
+            if (id) copyLink(id);
+        });
+    }
+
+    var deleteModal = document.getElementById('delete-class-modal');
+    var deleteModalText = document.getElementById('delete-class-modal-text');
+    var deleteModalBackdrop = document.getElementById('delete-class-modal-backdrop');
+    var deleteModalCancel = document.getElementById('delete-class-cancel');
+    var deleteModalConfirm = document.getElementById('delete-class-confirm');
+    var deleteModalError = document.getElementById('delete-class-modal-error');
+    var pendingDeleteViewId = null;
+
+    function openDeleteClassModal(viewId, className) {
+        if (!deleteModal || !deleteModalText) return;
+        pendingDeleteViewId = viewId;
+        if (deleteModalError) {
+            deleteModalError.textContent = '';
+            deleteModalError.classList.add('hidden');
+        }
+        deleteModalText.textContent =
+            'You are about to delete "' + className + '" and all of its data.';
+        deleteModal.classList.remove('hidden');
+        deleteModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        if (deleteModalConfirm) deleteModalConfirm.disabled = false;
+    }
+
+    function closeDeleteClassModal() {
+        if (!deleteModal) return;
+        pendingDeleteViewId = null;
+        deleteModal.classList.add('hidden');
+        deleteModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    if (deleteModalBackdrop) {
+        deleteModalBackdrop.addEventListener('click', closeDeleteClassModal);
+    }
+    if (deleteModalCancel) {
+        deleteModalCancel.addEventListener('click', closeDeleteClassModal);
+    }
+    if (deleteModalConfirm) {
+        deleteModalConfirm.addEventListener('click', async function () {
+            if (!pendingDeleteViewId || !deleteModalConfirm) return;
+            deleteModalConfirm.disabled = true;
+            try {
+                var res = await fetch('/class/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ viewId: pendingDeleteViewId })
+                });
+                var data = null;
+                var ct = res.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    data = await res.json();
+                }
+                if (!res.ok || !data || !data.ok) {
+                    deleteModalConfirm.disabled = false;
+                    if (deleteModalError) {
+                        deleteModalError.textContent = 'Could not delete this class. Try again or refresh the page.';
+                        deleteModalError.classList.remove('hidden');
+                    }
+                    return;
+                }
+                var vid = pendingDeleteViewId;
+                closeDeleteClassModal();
+                var card = list ? list.querySelector('.class-card[data-class-view-id="' + vid + '"]') : null;
+                if (card) card.remove();
+                if (list && !list.querySelector('.class-card')) {
+                    var listSection = document.getElementById('class-list-section');
+                    var pnum = listSection ? parseInt(listSection.getAttribute('data-page') || '1', 10) : 1;
+                    if (pnum > 1) {
+                        window.location.href = '/?page=' + (pnum - 1);
+                        return;
+                    }
+                    var p = document.createElement('p');
+                    p.id = 'class-list-empty';
+                    p.className =
+                        'rounded-lg border border-dashed border-zinc-800 py-8 text-center text-sm text-zinc-500';
+                    p.textContent = 'No classes yet. Add one above.';
+                    list.appendChild(p);
+                }
+            } catch (e) {
+                deleteModalConfirm.disabled = false;
+                if (deleteModalError) {
+                    deleteModalError.textContent = 'Network error. Check your connection and try again.';
+                    deleteModalError.classList.remove('hidden');
+                }
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape' || !deleteModal || deleteModal.classList.contains('hidden')) return;
+        closeDeleteClassModal();
+    });
+
+    var form = document.getElementById('create-class-form');
+    var errEl = document.getElementById('create-class-error');
+    var submitBtn = document.getElementById('create-class-submit');
+
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (errEl) {
+            errEl.textContent = '';
+            errEl.classList.add('hidden');
+        }
+
+        var prevText = submitBtn ? submitBtn.textContent : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating…';
+        }
+
+        try {
+            var fd = new FormData(form);
+            var body = new URLSearchParams(fd);
+            var res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: body.toString(),
+                credentials: 'same-origin'
+            });
+            var data = null;
+            var ct = res.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+                data = await res.json();
+            }
+
+            if (!res.ok || !data || !data.ok) {
+                var msg = 'Could not create class. Please try again.';
+                if (data && data.error === 'invalid_nonce') {
+                    msg = 'This page is out of date. Refresh and try again.';
+                }
+                if (errEl) {
+                    errEl.textContent = msg;
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+
+            var listSection = document.getElementById('class-list-section');
+            var curPage = listSection ? parseInt(listSection.getAttribute('data-page') || '1', 10) : 1;
+            if (curPage !== 1) {
+                window.location.href = '/?page=1';
+                return;
+            }
+
+            form.reset();
+            var nonceInput = form.querySelector('[name=_formNonce]');
+            if (nonceInput && data.formNonce) nonceInput.value = data.formNonce;
+            if (data.class) appendClassCard(data.class);
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = 'Network error. Check your connection and try again.';
+                errEl.classList.remove('hidden');
+            }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = prevText;
+            }
+        }
+    });
+})();
+</script>
+<% } %>
+
+<%- include('partials/footer') %>
