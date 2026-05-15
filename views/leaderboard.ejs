@@ -1,9 +1,10 @@
 <%- include('partials/header') %>
+<link rel="stylesheet" href="/css/class-theater.css" />
 <style>body{background-color:#f4f4f5!important;color:#18181b!important}</style>
 
-<div class="flex min-h-screen flex-col bg-zinc-100 text-zinc-900">
+<div class="cc-leaderboard-layout flex min-h-screen flex-col bg-zinc-100 text-zinc-900">
     <div class="mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-4 lg:py-6 lg:w-[30%] lg:min-w-0">
-        <div class="w-full pt-2 sm:pt-4">
+        <div class="cc-leaderboard-stack w-full pt-2 sm:pt-4">
             <% if (typeof isClassTeacher === 'undefined' || !isClassTeacher) { %>
                 <% if (!hasAlerts) { %>
                     <div class="mb-6 sm:mb-8">
@@ -199,6 +200,7 @@
 </script>
 <script id="leaderboard-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
 <script src="/js/class-pdf-sync.js"></script>
+<script src="/js/class-theater.js"></script>
 
 <script>
 (function () {

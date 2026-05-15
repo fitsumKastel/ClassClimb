@@ -1,16 +1,32 @@
 <%- include('partials/header') %>
+<link rel="stylesheet" href="/css/class-theater.css" />
 
-<div class="flex min-h-screen flex-col bg-[#000] text-white">
-    <div class="mx-auto flex w-full flex-1 flex-col px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:w-[30%] lg:min-w-0">
-        <section class="flex-1" aria-labelledby="student-list-heading">
+<div id="cc-teacher-layout" class="cc-teacher-layout bg-[#000] text-white">
+    <aside class="cc-teacher-rail-left" aria-label="Class tools">
+        <a href="/" class="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
+        <a href="/view/<%= classInfo.id %>" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Leaderboard" aria-label="Open leaderboard">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18" /><path d="M7 17l4-8 4 4 5-8" /></svg>
+        </a>
+        <button type="button" id="cc-rail-open-add-students" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Add students" aria-label="Add students">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+        <button type="button" id="cc-rail-open-broadcast" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Message class" aria-label="Message class">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+        </button>
+        <button type="button" id="cc-rail-open-drawer" class="cc-teacher-rail-btn mt-auto inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="More class tools" aria-label="More class tools">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+    </aside>
+    <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0 landscape:mx-0 landscape:max-w-none landscape:w-full landscape:p-0">
+        <section class="flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
             <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
             <p
-                class="mb-3 max-w-full break-words text-center text-[10px] leading-tight tracking-tight text-zinc-600 sm:mb-4"
+                class="cc-teacher-portrait-title mb-3 max-w-full break-words text-center text-[10px] leading-tight tracking-tight text-zinc-600 sm:mb-4"
                 title="Teacher console · <%= classInfo.class_name %><%= classInfo.school_name ? ' · ' + classInfo.school_name : '' %>"
             >
                 Teacher console · <%= classInfo.class_name %><% if (classInfo.school_name) { %> · <%= classInfo.school_name %><% } %>
             </p>
-            <div class="mb-3">
+            <div class="cc-teacher-side-top mb-3 px-0 landscape:mb-0 landscape:px-3 landscape:py-3">
                 <input
                     type="text"
                     id="student-search"
@@ -18,13 +34,12 @@
                     autocomplete="off"
                     class="w-full select-text rounded-xl border border-zinc-800 bg-[#111] px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
                 />
-            </div>
-            <div
-                id="class-live-announcement"
-                class="mb-3 hidden rounded-xl border border-sky-500/35 bg-sky-950/35 px-3.5 py-3 text-sm text-sky-100 shadow-sm"
-                role="status"
-                aria-live="polite"
-            >
+                <div
+                    id="class-live-announcement"
+                    class="mt-3 hidden rounded-xl border border-sky-500/35 bg-sky-950/35 px-3.5 py-3 text-sm text-sky-100 shadow-sm"
+                    role="status"
+                    aria-live="polite"
+                >
                 <div class="flex items-start gap-2">
                     <div class="min-w-0 flex-1">
                         <p class="text-[11px] font-semibold uppercase tracking-wide text-sky-400/90">Class message</p>
@@ -39,8 +54,10 @@
                     </button>
                 </div>
             </div>
-            <div id="cc-teacher-pdf-root" class="mb-3 min-h-0 w-full"></div>
-            <div id="student-xp-list" class="space-y-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
+            <div id="cc-teacher-pdf-stage" class="cc-teacher-pdf-stage mb-3 min-h-0 w-full landscape:mb-0">
+                <div id="cc-teacher-pdf-root" class="flex min-h-0 w-full flex-1 flex-col"></div>
+            </div>
+            <div id="student-xp-list" class="cc-teacher-side-students space-y-3 px-0 landscape:min-h-0 landscape:overflow-y-auto landscape:px-3 landscape:pb-3 landscape:pt-2" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
                 <% if (students.length === 0) { %>
                     <p class="rounded-xl border border-zinc-800 bg-[#111] px-3 py-6 text-center text-sm text-zinc-500 sm:px-4 sm:py-8">
                         No students yet.
@@ -381,6 +398,7 @@
 <script id="class-manage-students-json" type="application/json"><%- JSON.stringify(students.map((s) => ({ id: String(s.id), name: s.name, xp: s.xp }))) %></script>
 <script id="class-manage-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
 <script src="/js/class-pdf-sync.js"></script>
+<script src="/js/class-theater.js"></script>
 
 <script>
 let pendingActions = {};
@@ -1083,6 +1101,7 @@ function rebuildStudentXpList(students) {
             viewId: viewId,
             bootstrap: bootPdf,
             mainRoot: mainPdf,
+            pdfStage: document.getElementById('cc-teacher-pdf-stage'),
             modalRoot: modalPdf || null
         }).then(function (ctl) {
             teacherPdfCtl = ctl;

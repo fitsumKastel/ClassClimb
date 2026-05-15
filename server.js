@@ -435,6 +435,7 @@ app.get('/view/:classId', requireUser, (req, res) => {
                         footerSchoolName,
                         hasAlerts,
                         isClassTeacher,
+                        bodyPageClass: 'cc-leaderboard-theater',
                         headerBackHref: backHref,
                         headerBackLabel: backLabel,
                         pdfSyncBootstrap
