@@ -30,7 +30,7 @@
     }
 
     function isLandscapeTheater() {
-        return global.innerWidth > global.innerHeight && global.innerWidth >= 480;
+        return global.innerWidth > global.innerHeight;
     }
 
     function measureCanvasHost(canvas) {

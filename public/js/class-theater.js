@@ -1,16 +1,86 @@
 /**
- * Landscape theater: hide top bar, use left side nav; trigger PDF resize on layout change.
+ * Landscape theater: left student list, center PDF, right menu rail.
+ * On portrait phones, request landscape and show a rotate prompt when needed.
  */
 (function (global) {
     'use strict';
 
+    var rotatePrompt = null;
+    var landscapeLockAttempted = false;
+
+    function isPortrait() {
+        return global.innerWidth < global.innerHeight;
+    }
+
     function isLandscapeLayout() {
-        return global.innerWidth > global.innerHeight && global.innerWidth >= 480;
+        return global.innerWidth > global.innerHeight;
+    }
+
+    function isTeacherConsole() {
+        return document.body.classList.contains('cc-teacher-console');
+    }
+
+    function getRotatePrompt() {
+        if (!rotatePrompt) {
+            rotatePrompt = document.getElementById('cc-rotate-prompt');
+        }
+        return rotatePrompt;
+    }
+
+    function showRotatePrompt() {
+        if (!isTeacherConsole() || !isPortrait()) return;
+        var el = getRotatePrompt();
+        if (!el) return;
+        el.classList.remove('hidden');
+        el.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideRotatePrompt() {
+        var el = getRotatePrompt();
+        if (!el) return;
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+    }
+
+    function tryLockLandscape() {
+        if (!isTeacherConsole() || !isPortrait()) return;
+        var orient = global.screen && global.screen.orientation;
+        if (!orient || typeof orient.lock !== 'function') {
+            showRotatePrompt();
+            return;
+        }
+        orient
+            .lock('landscape')
+            .then(function () {
+                hideRotatePrompt();
+            })
+            .catch(function () {
+                showRotatePrompt();
+            });
+    }
+
+    function requestLandscapeOnPhone() {
+        if (!isTeacherConsole()) return;
+        if (!isPortrait()) {
+            hideRotatePrompt();
+            return;
+        }
+        if (!landscapeLockAttempted) {
+            landscapeLockAttempted = true;
+            tryLockLandscape();
+        } else {
+            showRotatePrompt();
+        }
     }
 
     function syncTheaterClass() {
         var on = isLandscapeLayout();
         document.body.classList.toggle('cc-theater-landscape', on);
+        if (on) {
+            hideRotatePrompt();
+        } else if (isTeacherConsole()) {
+            requestLandscapeOnPhone();
+        }
         if (typeof global.ccTailwindRefresh === 'function') {
             global.ccTailwindRefresh();
         }
@@ -44,11 +114,13 @@
     });
 
     syncTheaterClass();
+    requestLandscapeOnPhone();
     wireRailButtons();
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
             syncTheaterClass();
+            requestLandscapeOnPhone();
             wireRailButtons();
         });
     }

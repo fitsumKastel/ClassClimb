@@ -1,11 +1,10 @@
-/* Teacher console: landscape = left side nav, center PDF (full height), right students. */
+/* Teacher console: landscape = left students, center PDF, right menu rail. */
 
 body.cc-teacher-console.cc-theater-landscape,
 body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
     overflow: hidden;
 }
 
-/* Hide top header whenever landscape layout is active (CSS + JS class). */
 body.cc-teacher-console.cc-theater-landscape .cc-top-nav,
 body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     display: none !important;
@@ -24,7 +23,21 @@ body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     min-height: calc(100dvh - 4rem);
 }
 
-.cc-teacher-rail-left {
+.cc-teacher-sidebar-left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-teacher-sidebar-head {
+    display: none;
+}
+
+.cc-teacher-sidebar-list-label {
+    display: none;
+}
+
+.cc-teacher-rail-right {
     display: none;
 }
 
@@ -120,7 +133,59 @@ body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     border-radius: 0;
 }
 
-/* Pure CSS fallback: landscape orientation on teacher console (no JS required). */
+/* Portrait phone: prompt rotation */
+.cc-rotate-prompt {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.92);
+}
+
+.cc-rotate-prompt.hidden {
+    display: none !important;
+}
+
+.cc-rotate-prompt-inner {
+    max-width: 18rem;
+    text-align: center;
+}
+
+.cc-rotate-prompt-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: rgb(96 165 250);
+    animation: cc-rotate-hint 2.4s ease-in-out infinite;
+}
+
+.cc-rotate-prompt-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.cc-rotate-prompt-body {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: rgb(161 161 170);
+}
+
+@keyframes cc-rotate-hint {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    40% {
+        transform: rotate(-90deg);
+    }
+}
+
+/* Landscape theater layout */
 @media (orientation: landscape) {
     body.cc-teacher-console .cc-top-nav {
         display: none !important;
@@ -129,117 +194,120 @@ body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     body.cc-teacher-console {
         overflow: hidden;
     }
-
-    .cc-teacher-layout {
-        flex-direction: row;
-        height: 100dvh;
-        max-height: 100dvh;
-        min-height: 0;
-        overflow: hidden;
-    }
-
-    .cc-teacher-rail-left {
-        display: flex;
-        width: 3.75rem;
-        flex-shrink: 0;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.35rem;
-        border-right: 1px solid rgb(39 39 42);
-        background: #000;
-        padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.35rem 0.5rem;
-    }
-
-    .cc-teacher-content {
-        flex: 1;
-        min-height: 0;
-        min-width: 0;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: none !important;
-        width: auto !important;
-    }
-
-    .cc-teacher-content > .cc-teacher-stage {
-        display: grid !important;
-        height: 100%;
-        min-height: 0;
-        grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
-        grid-template-rows: auto minmax(0, 1fr);
-    }
-
-    .cc-teacher-portrait-title {
-        display: none !important;
-    }
-
-    .cc-teacher-pdf-stage {
-        grid-column: 1;
-        grid-row: 1 / -1;
-        margin-bottom: 0 !important;
-        min-height: 0;
-        height: 100%;
-    }
-
-    .cc-teacher-pdf-stage .cc-pdf-viewer-root {
-        height: 100%;
-        border: none;
-        border-radius: 0;
-        background: #000;
-        padding: 0.35rem;
-        box-shadow: none;
-    }
-
-    .cc-teacher-pdf-stage .cc-pdf-toolbar-block {
-        flex-shrink: 0;
-    }
-
-    .cc-teacher-pdf-stage .cc-pdf-toolbar-block.cc-pdf-toolbar-upload {
-        display: none;
-    }
-
-    .cc-teacher-side-top {
-        grid-column: 2;
-        grid-row: 1;
-        margin-bottom: 0 !important;
-        border-bottom: 1px solid rgb(39 39 42 / 0.85);
-    }
-
-    .cc-teacher-side-students {
-        grid-column: 2;
-        grid-row: 2;
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
-        border-left: 1px solid rgb(39 39 42);
-    }
 }
 
-/* JS class mirrors orientation + width>height for tablets/desktop edge cases. */
+body.cc-teacher-console.cc-theater-landscape,
 body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
-    flex-direction: row;
     height: 100dvh;
     max-height: 100dvh;
     min-height: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
+    display: grid;
+    grid-template-columns: minmax(13rem, min(26vw, 22rem)) minmax(0, 1fr) 3.75rem;
+    grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
 }
 
-body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-left {
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-left {
+    grid-column: 1;
+    grid-row: 1;
     display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid rgb(39 39 42);
+    background: #000;
 }
 
-body.cc-teacher-console.cc-theater-landscape .cc-teacher-content > .cc-teacher-stage {
-    display: grid !important;
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-content {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-head {
+    display: flex;
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-list-label {
+    display: block;
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-side-top {
+    flex-shrink: 0;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid rgb(39 39 42 / 0.85);
+    padding-bottom: 0.75rem !important;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-side-students {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-content {
+    min-height: 0;
+    min-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    display: flex;
+    flex-direction: column;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-stage {
     height: 100%;
     min-height: 0;
-    grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
-    grid-template-rows: auto minmax(0, 1fr);
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-portrait-title {
+    display: none !important;
 }
 
 body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage {
-    grid-column: 1;
-    grid-row: 1 / -1;
+    margin-bottom: 0 !important;
     height: 100%;
+    min-height: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-viewer-root {
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    background: #000;
+    padding: 0.35rem;
+    box-shadow: none;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-toolbar-block {
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-toolbar-block.cc-pdf-toolbar-upload {
+    display: none;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
+    display: flex;
+    width: 3.75rem;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    border-left: 1px solid rgb(39 39 42);
+    background: #000;
+    padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.35rem 0.5rem;
     min-height: 0;
 }
 

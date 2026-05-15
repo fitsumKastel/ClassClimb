@@ -1,32 +1,19 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/class-theater.css" />
 
+<div id="cc-rotate-prompt" class="cc-rotate-prompt hidden" role="dialog" aria-modal="true" aria-labelledby="cc-rotate-prompt-title" aria-hidden="true">
+    <div class="cc-rotate-prompt-inner">
+        <svg class="cc-rotate-prompt-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <path d="M9 12h6M12 9v6" stroke-linecap="round" />
+        </svg>
+        <p id="cc-rotate-prompt-title" class="cc-rotate-prompt-title">Rotate your phone</p>
+        <p class="cc-rotate-prompt-body">Turn your device sideways for the teacher console layout.</p>
+    </div>
+</div>
+
 <div id="cc-teacher-layout" class="cc-teacher-layout bg-[#000] text-white">
-    <aside class="cc-teacher-rail-left" aria-label="Class tools">
-        <a
-            href="<%= typeof headerBackHref !== 'undefined' && headerBackHref ? headerBackHref : '/' %>"
-            id="cc-rail-back"
-            class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            title="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
-            aria-label="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-        </a>
-        <a href="/" class="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
-        <a href="/view/<%= classInfo.id %>" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Leaderboard" aria-label="Open leaderboard">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18" /><path d="M7 17l4-8 4 4 5-8" /></svg>
-        </a>
-        <button type="button" id="cc-rail-open-add-students" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Add students" aria-label="Add students">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-        </button>
-        <button type="button" id="cc-rail-open-broadcast" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Message class" aria-label="Message class">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-        </button>
-        <button type="button" id="cc-rail-open-drawer" class="cc-teacher-rail-btn mt-auto inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="More class tools" aria-label="More class tools">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
-    </aside>
-    <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0 landscape:mx-0 landscape:max-w-none landscape:w-full landscape:p-0">
+    <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0">
         <section class="cc-teacher-stage flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
             <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
             <p
@@ -35,7 +22,37 @@
             >
                 Teacher console · <%= classInfo.class_name %><% if (classInfo.school_name) { %> · <%= classInfo.school_name %><% } %>
             </p>
-            <div class="cc-teacher-side-top mb-3 px-0 landscape:mb-0 landscape:px-3 landscape:py-3">
+            <div id="cc-teacher-pdf-stage" class="cc-teacher-pdf-stage mb-3 min-h-0 w-full">
+                <div id="cc-teacher-pdf-root" class="flex min-h-0 w-full flex-1 flex-col"></div>
+            </div>
+        </section>
+    </div>
+    <aside class="cc-teacher-sidebar-left" aria-label="Students">
+        <header class="cc-teacher-sidebar-head flex items-start gap-2 border-b border-zinc-800/85 px-3 py-3">
+            <a
+                href="<%= typeof headerBackHref !== 'undefined' && headerBackHref ? headerBackHref : '/' %>"
+                id="cc-sidebar-back"
+                class="cc-teacher-sidebar-back order-2 ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-700 text-zinc-300 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                title="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
+                aria-label="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+            </a>
+            <div class="cc-teacher-sidebar-brand flex min-w-0 flex-1 items-center gap-3">
+                <span class="cc-teacher-sidebar-avatar inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-700 bg-zinc-900">
+                    <img src="/asset/xp.png" alt="" class="h-7 w-7 object-contain" width="28" height="28" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Class</p>
+                    <p class="truncate text-sm font-semibold text-zinc-100" title="<%= classInfo.class_name %>"><%= classInfo.class_name %></p>
+                    <% if (classInfo.school_name) { %>
+                        <p class="truncate text-[11px] text-zinc-500" title="<%= classInfo.school_name %>"><%= classInfo.school_name %></p>
+                    <% } %>
+                </div>
+            </div>
+        </header>
+        <p class="cc-teacher-sidebar-list-label px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Student list</p>
+        <div class="cc-teacher-side-top mb-3 px-3">
                 <input
                     type="text"
                     id="student-search"
@@ -62,11 +79,9 @@
                         Dismiss
                     </button>
                 </div>
+                </div>
             </div>
-            <div id="cc-teacher-pdf-stage" class="cc-teacher-pdf-stage mb-3 min-h-0 w-full landscape:mb-0">
-                <div id="cc-teacher-pdf-root" class="flex min-h-0 w-full flex-1 flex-col"></div>
-            </div>
-            <div id="student-xp-list" class="cc-teacher-side-students space-y-3 px-0 landscape:min-h-0 landscape:overflow-y-auto landscape:px-3 landscape:pb-3 landscape:pt-2" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
+        <div id="student-xp-list" class="cc-teacher-side-students min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
                 <% if (students.length === 0) { %>
                     <p class="rounded-xl border border-zinc-800 bg-[#111] px-3 py-6 text-center text-sm text-zinc-500 sm:px-4 sm:py-8">
                         No students yet.
@@ -146,9 +161,23 @@
                         <div id="status-<%= student.id %>" class="mt-2 min-h-0"></div>
                     </div>
                 <% }) %>
-            </div>
-        </section>
-    </div>
+        </div>
+    </aside>
+    <aside class="cc-teacher-rail-right" aria-label="Class tools">
+        <a href="/" class="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
+        <a href="/view/<%= classInfo.id %>" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Leaderboard" aria-label="Open leaderboard">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18" /><path d="M7 17l4-8 4 4 5-8" /></svg>
+        </a>
+        <button type="button" id="cc-rail-open-add-students" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Add students" aria-label="Add students">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+        <button type="button" id="cc-rail-open-broadcast" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Message class" aria-label="Message class">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+        </button>
+        <button type="button" id="cc-rail-open-drawer" class="cc-teacher-rail-btn mt-auto inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="More class tools" aria-label="More class tools">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+    </aside>
 </div>
 
 <div id="class-manage-drawer" class="<%= ccDrawerRoot %>" data-open="false" aria-hidden="true">
