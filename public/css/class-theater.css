@@ -1,11 +1,21 @@
-/* Teacher console: landscape = left tools rail, center PDF, right student panel (Twitch-style). */
+/* Teacher console: landscape = left side nav, center PDF (full height), right students. */
 
-body.cc-teacher-console.cc-theater-landscape {
+body.cc-teacher-console.cc-theater-landscape,
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
     overflow: hidden;
 }
 
-body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
+/* Hide top header whenever landscape layout is active (CSS + JS class). */
+body.cc-teacher-console.cc-theater-landscape .cc-top-nav,
+body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .cc-teacher-layout {
@@ -26,6 +36,13 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
     min-width: 0;
 }
 
+.cc-teacher-stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
 .cc-teacher-pdf-stage {
     display: flex;
     flex: 1;
@@ -40,10 +57,21 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
     flex-direction: column;
     min-height: 0;
     min-width: 0;
-    border: none;
-    background: transparent;
-    padding: 0;
-    box-shadow: none;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-viewer-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 0.5rem;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-canvas-host {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .cc-teacher-pdf-stage .cc-pdf-canvas-wrap {
@@ -74,7 +102,17 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
     margin: 0 !important;
     max-height: none !important;
     min-height: 0 !important;
+    height: 100dvh !important;
     background: #000;
+}
+
+.cc-pdf-stage--fullscreen .cc-pdf-viewer-root,
+.cc-pdf-stage--fullscreen .cc-pdf-viewer-body,
+.cc-pdf-stage--fullscreen .cc-pdf-canvas-host,
+.cc-pdf-stage--fullscreen .cc-pdf-canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
 }
 
 .cc-pdf-stage--fullscreen .cc-pdf-canvas-wrap {
@@ -82,7 +120,16 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
     border-radius: 0;
 }
 
-@media (orientation: landscape) and (min-width: 640px) {
+/* Pure CSS fallback: landscape orientation on teacher console (no JS required). */
+@media (orientation: landscape) {
+    body.cc-teacher-console .cc-top-nav {
+        display: none !important;
+    }
+
+    body.cc-teacher-console {
+        overflow: hidden;
+    }
+
     .cc-teacher-layout {
         flex-direction: row;
         height: 100dvh;
@@ -93,7 +140,7 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
 
     .cc-teacher-rail-left {
         display: flex;
-        width: 4.25rem;
+        width: 3.75rem;
         flex-shrink: 0;
         flex-direction: column;
         align-items: center;
@@ -113,11 +160,11 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
         width: auto !important;
     }
 
-    .cc-teacher-content > section {
-        display: grid;
+    .cc-teacher-content > .cc-teacher-stage {
+        display: grid !important;
         height: 100%;
         min-height: 0;
-        grid-template-columns: minmax(0, 1fr) minmax(14rem, min(22rem, 32vw));
+        grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
         grid-template-rows: auto minmax(0, 1fr);
     }
 
@@ -130,6 +177,24 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
         grid-row: 1 / -1;
         margin-bottom: 0 !important;
         min-height: 0;
+        height: 100%;
+    }
+
+    .cc-teacher-pdf-stage .cc-pdf-viewer-root {
+        height: 100%;
+        border: none;
+        border-radius: 0;
+        background: #000;
+        padding: 0.35rem;
+        box-shadow: none;
+    }
+
+    .cc-teacher-pdf-stage .cc-pdf-toolbar-block {
+        flex-shrink: 0;
+    }
+
+    .cc-teacher-pdf-stage .cc-pdf-toolbar-block.cc-pdf-toolbar-upload {
+        display: none;
     }
 
     .cc-teacher-side-top {
@@ -150,7 +215,35 @@ body.cc-teacher-console.cc-theater-landscape .cc-top-nav {
     }
 }
 
-/* Leaderboard: live PDF + landscape — PDF left, roster right. */
+/* JS class mirrors orientation + width>height for tablets/desktop edge cases. */
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
+    flex-direction: row;
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-left {
+    display: flex;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-content > .cc-teacher-stage {
+    display: grid !important;
+    height: 100%;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    height: 100%;
+    min-height: 0;
+}
+
+/* Leaderboard landscape PDF + roster */
 body.cc-leaderboard-theater.cc-theater-landscape {
     overflow: hidden;
 }
@@ -159,7 +252,11 @@ body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
     display: none !important;
 }
 
-@media (orientation: landscape) and (min-width: 640px) {
+@media (orientation: landscape) {
+    body.cc-leaderboard-theater .cc-top-nav {
+        display: none !important;
+    }
+
     .cc-leaderboard-layout.cc-leaderboard-pdf-active {
         height: 100dvh;
         max-height: 100dvh;
@@ -171,26 +268,32 @@ body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
         min-height: 0;
         max-width: none !important;
         width: 100% !important;
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
+        padding: 0.25rem 0 !important;
+        margin: 0 !important;
     }
 
     .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack {
         display: grid;
         height: 100%;
         min-height: 0;
-        grid-template-columns: minmax(0, 1fr) minmax(14rem, min(22rem, 32vw));
+        grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
         grid-template-rows: auto auto minmax(0, 1fr);
-        align-content: stretch;
     }
 
     .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host {
         grid-column: 1;
         grid-row: 1 / -1;
         display: flex !important;
+        flex-direction: column;
         margin-bottom: 0 !important;
         min-height: 0;
-        padding: 0 0.5rem;
+        height: 100%;
+        padding: 0 0.35rem;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host .cc-pdf-canvas-wrap {
+        flex: 1;
+        min-height: 0;
     }
 
     .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack > :not(.cc-leaderboard-pdf-host):not(#leaderboard-list) {
@@ -202,6 +305,5 @@ body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
         grid-row: 3;
         min-height: 0;
         overflow-y: auto;
-        align-self: stretch;
     }
 }

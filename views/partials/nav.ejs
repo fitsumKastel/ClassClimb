@@ -19,6 +19,7 @@
             <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
                 <% if (navBackHref) { %>
                     <a
+                        id="cc-top-nav-back"
                         href="<%= navBackHref %>"
                         class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg <%= studentNav ? 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900' : 'text-zinc-400 hover:bg-zinc-900 hover:text-white' %> transition"
                         aria-label="<%= navBackLabel %>"

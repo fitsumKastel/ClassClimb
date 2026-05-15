@@ -3,7 +3,16 @@
 
 <div id="cc-teacher-layout" class="cc-teacher-layout bg-[#000] text-white">
     <aside class="cc-teacher-rail-left" aria-label="Class tools">
-        <a href="/" class="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
+        <a
+            href="<%= typeof headerBackHref !== 'undefined' && headerBackHref ? headerBackHref : '/' %>"
+            id="cc-rail-back"
+            class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+            title="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
+            aria-label="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+        </a>
+        <a href="/" class="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
         <a href="/view/<%= classInfo.id %>" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Leaderboard" aria-label="Open leaderboard">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18" /><path d="M7 17l4-8 4 4 5-8" /></svg>
         </a>
@@ -18,7 +27,7 @@
         </button>
     </aside>
     <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0 landscape:mx-0 landscape:max-w-none landscape:w-full landscape:p-0">
-        <section class="flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
+        <section class="cc-teacher-stage flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
             <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
             <p
                 class="cc-teacher-portrait-title mb-3 max-w-full break-words text-center text-[10px] leading-tight tracking-tight text-zinc-600 sm:mb-4"

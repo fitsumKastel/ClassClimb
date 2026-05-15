@@ -1,19 +1,23 @@
 /**
- * Landscape theater mode: hide top nav, enable left-rail tools on teacher console.
+ * Landscape theater: hide top bar, use left side nav; trigger PDF resize on layout change.
  */
 (function (global) {
     'use strict';
 
-    var mq = global.matchMedia('(orientation: landscape) and (min-width: 640px)');
+    function isLandscapeLayout() {
+        return global.innerWidth > global.innerHeight && global.innerWidth >= 480;
+    }
 
     function syncTheaterClass() {
-        var on = mq.matches;
+        var on = isLandscapeLayout();
         document.body.classList.toggle('cc-theater-landscape', on);
         if (typeof global.ccTailwindRefresh === 'function') {
             global.ccTailwindRefresh();
         }
         if (typeof global.__ccPdfResize === 'function') {
-            global.__ccPdfResize();
+            global.requestAnimationFrame(function () {
+                global.__ccPdfResize();
+            });
         }
     }
 
@@ -34,16 +38,18 @@
         });
     }
 
-    if (typeof mq.addEventListener === 'function') {
-        mq.addEventListener('change', syncTheaterClass);
-    } else if (typeof mq.addListener === 'function') {
-        mq.addListener(syncTheaterClass);
-    }
+    global.addEventListener('resize', syncTheaterClass);
+    global.addEventListener('orientationchange', function () {
+        global.setTimeout(syncTheaterClass, 100);
+    });
 
     syncTheaterClass();
     wireRailButtons();
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', wireRailButtons);
+        document.addEventListener('DOMContentLoaded', function () {
+            syncTheaterClass();
+            wireRailButtons();
+        });
     }
 })(typeof window !== 'undefined' ? window : globalThis);

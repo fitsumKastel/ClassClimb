@@ -30,7 +30,7 @@
     }
 
     function isLandscapeTheater() {
-        return global.matchMedia('(orientation: landscape) and (min-width: 640px)').matches;
+        return global.innerWidth > global.innerHeight && global.innerWidth >= 480;
     }
 
     function measureCanvasHost(canvas) {
@@ -222,19 +222,19 @@
             'cc-pdf-viewer-root flex min-h-0 flex-1 flex-col gap-2 rounded-2xl border border-zinc-800/90 bg-[#111] p-3 shadow-sm shadow-black/20 sm:p-4';
         ui.innerHTML =
             '<div class="flex flex-col gap-3">' +
-            '<div class="flex flex-wrap items-center justify-between gap-2">' +
+            '<div class="cc-pdf-toolbar-block flex flex-wrap items-center justify-between gap-2">' +
             '<p class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Class material (PDF)</p>' +
             '<label class="flex cursor-pointer items-center gap-2 text-xs text-zinc-300">' +
             '<input type="checkbox" id="cc-pdf-live" class="h-4 w-4 rounded border-zinc-600 bg-[#111] text-blue-600 focus:ring-blue-500/40" />' +
             '<span>Show this PDF on the leaderboard — same page as here</span>' +
             '</label>' +
             '</div>' +
-            '<div class="flex flex-wrap items-center gap-2">' +
+            '<div class="cc-pdf-toolbar-block cc-pdf-toolbar-upload flex flex-wrap items-center gap-2">' +
             '<input type="file" accept="application/pdf,.pdf" id="cc-pdf-file" class="max-w-full text-xs text-zinc-400 file:mr-2 file:rounded-lg file:border-0 file:bg-zinc-800 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-200" />' +
             '<button type="button" id="cc-pdf-upload" class="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700">Upload</button>' +
             '<span id="cc-pdf-status" class="text-xs text-zinc-500"></span>' +
             '</div>' +
-            '<div id="cc-pdf-nav" class="hidden flex flex-wrap items-center justify-between gap-2">' +
+            '<div id="cc-pdf-nav" class="cc-pdf-toolbar-block hidden flex flex-wrap items-center justify-between gap-2">' +
             '<div class="flex items-center gap-2">' +
             '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Prev</button>' +
             '<button type="button" id="cc-pdf-next" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Next</button>' +
@@ -244,7 +244,7 @@
             fullscreenIconSvg() +
             '</button>' +
             '</div>' +
-            '<div id="cc-pdf-canvas-host-main" class="flex min-h-0 flex-1 flex-col"></div>' +
+            '<div id="cc-pdf-canvas-host-main" class="cc-pdf-canvas-host flex min-h-0 flex-1 flex-col"></div>' +
             '</div>';
         mainRoot.appendChild(ui);
 
@@ -532,15 +532,16 @@
             applyLayout();
         }
 
-        if (typeof global.matchMedia === 'function') {
-            var lmq = global.matchMedia('(orientation: landscape) and (min-width: 640px)');
-            var onLmq = function () {
+        global.addEventListener('resize', function () {
+            applyLayout();
+            if (state.pdf) renderCurrent(state, [pair.canvas]);
+        });
+        global.addEventListener('orientationchange', function () {
+            global.setTimeout(function () {
                 applyLayout();
                 if (state.pdf) renderCurrent(state, [pair.canvas]);
-            };
-            if (typeof lmq.addEventListener === 'function') lmq.addEventListener('change', onLmq);
-            else if (typeof lmq.addListener === 'function') lmq.addListener(onLmq);
-        }
+            }, 100);
+        });
 
         await refreshRender();
 
