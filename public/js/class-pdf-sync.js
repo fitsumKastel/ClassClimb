@@ -67,6 +67,7 @@
         if (!state.pdf || !canvases || !canvases.length) {
             return;
         }
+        var dpr = window.devicePixelRatio || 1;
         var pageNum = clamp(state.page, 1, state.numPages);
         for (var i = 0; i < canvases.length; i++) {
             var canvas = canvases[i];
@@ -75,10 +76,12 @@
             var base = page.getViewport({ scale: 1 });
             var w = canvas.parentElement.clientWidth || 320;
             var scale = Math.max(0.75, Math.min(2.25, (w - 8) / base.width));
-            var viewport = page.getViewport({ scale: scale });
+            var viewport = page.getViewport({ scale: scale * dpr });
             var ctx = canvas.getContext('2d');
             canvas.width = viewport.width;
             canvas.height = viewport.height;
+            canvas.style.width = (viewport.width / dpr) + 'px';
+            canvas.style.height = (viewport.height / dpr) + 'px';
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         }
     }
@@ -97,14 +100,14 @@
     }
 
     /**
-     * @param {{ classId: string, bootstrap: object, mainRoot: HTMLElement, modalRoot?: HTMLElement|null }} opts
+     * @param {{ classId: string, bootstrap: object, mainRoot: HTMLElement, modalRoot?: HTMLElement|null, isTeacher?: boolean }} opts
      */
     async function initTeacher(opts) {
         var classId = String(opts.classId || '');
         var mainRoot = opts.mainRoot;
         if (!classId || !mainRoot) return;
 
-        var state = { boot: opts.bootstrap || {}, hasPdf: false, live: false, numPages: 0, page: 1, rev: 0, pdfUrl: '', pdf: null };
+        var state = { boot: opts.bootstrap || {}, hasPdf: false, live: false, numPages: 0, page: 1, rev: 0, pdfUrl: '', pdf: null, isTeacher: !!opts.isTeacher };
         applyPdfSyncToState(state, state.boot);
 
         clearEl(mainRoot);
@@ -125,11 +128,14 @@
             '<span id="cc-pdf-status" class="text-xs text-zinc-500"></span>' +
             '</div>' +
             '<div id="cc-pdf-nav" class="hidden flex flex-wrap items-center justify-between gap-2">' +
-            '<div class="flex items-center gap-2">' +
-            '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Prev</button>' +
-            '<button type="button" id="cc-pdf-next" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Next</button>' +
-            '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-400"></span>' +
-            '</div>' +
+            (state.isTeacher ?
+                '<div class="flex items-center gap-2">' +
+                '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Prev</button>' +
+                '<input type="number" id="cc-pdf-jump" min="1" step="1" class="w-12 rounded-lg border border-zinc-700 bg-zinc-900 px-1 py-1 text-center text-xs font-medium text-zinc-200 focus:border-blue-500 focus:outline-none" />' +
+                '<button type="button" id="cc-pdf-next" class="rounded-lg border border-zinc-700 px-2 py-1 text-xs font-medium text-zinc-200 hover:bg-zinc-800">Next</button>' +
+                '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-400"></span>' +
+                '</div>'
+                : '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-400"></span>') +
             '</div>' +
             '<div id="cc-pdf-canvas-host-main"></div>' +
             '</div>';
@@ -159,6 +165,7 @@
         var navEl = ui.querySelector('#cc-pdf-nav');
         var prevBtn = ui.querySelector('#cc-pdf-prev');
         var nextBtn = ui.querySelector('#cc-pdf-next');
+        var jumpInput = ui.querySelector('#cc-pdf-jump');
         var pageLabel = ui.querySelector('#cc-pdf-page-label');
 
         function setStatus(t) {
@@ -172,8 +179,12 @@
         function updateNavUi() {
             var show = Boolean(state.hasPdf && state.numPages > 0);
             if (navEl) navEl.classList.toggle('hidden', !show);
+            if (jumpInput) {
+                jumpInput.value = state.page;
+                jumpInput.max = state.numPages;
+            }
             if (pageLabel) {
-                pageLabel.textContent = show ? state.page + ' / ' + state.numPages : '';
+                pageLabel.textContent = show ? ' / ' + state.numPages : '';
             }
         }
 
@@ -235,6 +246,16 @@
         if (nextBtn) nextBtn.addEventListener('click', function () {
             goPage(1);
         });
+        if (jumpInput) {
+            jumpInput.addEventListener('change', function () {
+                var target = parseInt(jumpInput.value, 10);
+                if (!isNaN(target)) {
+                    goPage(target - state.page);
+                } else {
+                    jumpInput.value = state.page;
+                }
+            });
+        }
 
         if (uploadBtn && fileEl) {
             uploadBtn.addEventListener('click', async function () {
@@ -316,7 +337,7 @@
     }
 
     /**
-     * @param {{ classId: string, bootstrap: object, leaderboardRoot: HTMLElement, listContainer: HTMLElement }} opts
+     * @param {{ classId: string, bootstrap: object, leaderboardRoot: HTMLElement, listContainer: HTMLElement, isTeacher?: boolean }} opts
      */
     async function initLeaderboard(opts) {
         var classId = String(opts.classId || '');
@@ -324,7 +345,7 @@
         var listEl = opts.listContainer;
         if (!classId || !root || !listEl) return;
 
-        var state = { boot: opts.bootstrap || {}, hasPdf: false, live: false, numPages: 0, page: 1, rev: 0, pdfUrl: '', pdf: null };
+        var state = { boot: opts.bootstrap || {}, hasPdf: false, live: false, numPages: 0, page: 1, rev: 0, pdfUrl: '', pdf: null, isTeacher: !!opts.isTeacher };
         applyPdfSyncToState(state, state.boot);
 
         var pdfHost = document.createElement('div');
@@ -335,13 +356,63 @@
         var pair = makeCanvasWrap('relative w-full overflow-auto rounded-xl border border-zinc-200 bg-white');
         pdfHost.appendChild(pair.wrap);
 
+        var nav = document.createElement('div');
+        nav.id = 'cc-pdf-nav';
+        nav.className = 'mb-2 hidden flex flex-wrap items-center justify-between gap-2';
+        nav.innerHTML = state.isTeacher ?
+            '<div class="flex items-center gap-2">' +
+            '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100">Prev</button>' +
+            '<input type="number" id="cc-pdf-jump" min="1" step="1" class="w-12 rounded-lg border border-zinc-300 bg-white px-1 py-1 text-center text-xs font-medium text-zinc-700 focus:border-blue-500 focus:outline-none" />' +
+            '<button type="button" id="cc-pdf-next" class="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100">Next</button>' +
+            '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-500"></span>' +
+            '</div>'
+            : '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-500"></span>';
+        pdfHost.insertBefore(nav, pair.wrap);
+
+        var prevBtn = nav.querySelector('#cc-pdf-prev');
+        var nextBtn = nav.querySelector('#cc-pdf-next');
+        var jumpInput = nav.querySelector('#cc-pdf-jump');
+        var pageLabel = nav.querySelector('#cc-pdf-page-label');
+
+        function updateNavUi() {
+            var show = Boolean(state.hasPdf && state.numPages > 0);
+            nav.classList.toggle('hidden', !show);
+            if (jumpInput) {
+                jumpInput.value = state.page;
+                jumpInput.max = state.numPages;
+            }
+            if (pageLabel) {
+                pageLabel.textContent = show ? (state.isTeacher ? ' / ' : 'Page ') + state.page + ' / ' + state.numPages : '';
+            }
+        }
+
+        async function goPage(delta) {
+            if (!state.numPages) return;
+            var next = clamp(state.page + delta, 1, state.numPages);
+            if (next === state.page) return;
+            state.page = next;
+            await renderCurrent(state, [pair.canvas]);
+            await postJson('/class/pdf-page', { classId: classId, page: state.page });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { goPage(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { goPage(1); });
+        if (jumpInput) {
+            jumpInput.addEventListener('change', function () {
+                var target = parseInt(jumpInput.value, 10);
+                if (!isNaN(target)) goPage(target - state.page);
+                else jumpInput.value = state.page;
+            });
+        }
+
         var lastStudents = null;
 
         function applyLayout() {
             var showPdf =
                 Boolean(state.live && state.hasPdf && state.numPages > 0 && state.pdf);
             pdfHost.classList.toggle('hidden', !showPdf);
-            listEl.classList.toggle('hidden', showPdf);
+            updateNavUi();
+            // listEl.classList.toggle('hidden', showPdf); // Keep list visible below PDF
             if (typeof global.ccTailwindRefresh === 'function') global.ccTailwindRefresh();
         }
 
@@ -353,6 +424,7 @@
             }
             try {
                 await loadDocument(state);
+                updateNavUi();
                 await renderCurrent(state, [pair.canvas]);
             } catch (e) {
                 state.pdf = null;

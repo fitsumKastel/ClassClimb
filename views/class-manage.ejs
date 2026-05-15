@@ -1083,7 +1083,8 @@ function rebuildStudentXpList(students) {
             viewId: viewId,
             bootstrap: bootPdf,
             mainRoot: mainPdf,
-            modalRoot: modalPdf || null
+            modalRoot: modalPdf || null,
+            isTeacher: true
         }).then(function (ctl) {
             teacherPdfCtl = ctl;
             window.__ccTeacherPdfCtl = ctl;

@@ -479,7 +479,8 @@
             classId: classId,
             bootstrap: bootPdfLb,
             leaderboardRoot: container.parentElement,
-            listContainer: container
+            listContainer: container,
+            isTeacher: typeof isClassTeacher !== 'undefined' && isClassTeacher
         }).then(function (ctl) {
             leaderboardPdfCtl = ctl;
             connect();
