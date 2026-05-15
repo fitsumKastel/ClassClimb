@@ -1,17 +1,6 @@
 <%- include('partials/header') %>
 <link rel="stylesheet" href="/css/class-theater.css" />
 
-<div id="cc-rotate-prompt" class="cc-rotate-prompt hidden" role="dialog" aria-modal="true" aria-labelledby="cc-rotate-prompt-title" aria-hidden="true">
-    <div class="cc-rotate-prompt-inner">
-        <svg class="cc-rotate-prompt-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <rect x="5" y="2" width="14" height="20" rx="2" />
-            <path d="M9 12h6M12 9v6" stroke-linecap="round" />
-        </svg>
-        <p id="cc-rotate-prompt-title" class="cc-rotate-prompt-title">Rotate your phone</p>
-        <p class="cc-rotate-prompt-body">Turn your device sideways for the teacher console layout.</p>
-    </div>
-</div>
-
 <div id="cc-teacher-layout" class="cc-teacher-layout bg-[#000] text-white">
     <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0">
         <section class="cc-teacher-stage flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
@@ -435,8 +424,8 @@
 
 <script id="class-manage-students-json" type="application/json"><%- JSON.stringify(students.map((s) => ({ id: String(s.id), name: s.name, xp: s.xp }))) %></script>
 <script id="class-manage-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
-<script src="/js/class-pdf-sync.js"></script>
 <script src="/js/class-theater.js"></script>
+<script src="/js/class-pdf-sync.js"></script>
 
 <script>
 let pendingActions = {};

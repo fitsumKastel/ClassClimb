@@ -187,8 +187,12 @@
             var ctx = canvas.getContext('2d');
             canvas.width = viewport.width;
             canvas.height = viewport.height;
-            canvas.style.width = (viewport.width / dpr) + 'px';
-            canvas.style.height = (viewport.height / dpr) + 'px';
+            var cssW = viewport.width / dpr;
+            var cssH = viewport.height / dpr;
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            canvas.style.maxWidth = '100%';
+            canvas.style.maxHeight = '100%';
             await page.render({ canvasContext: ctx, viewport: viewport }).promise;
         }
     }
@@ -500,21 +504,25 @@
         canvasArea.className = 'cc-leaderboard-pdf-canvas-area relative flex min-h-0 flex-1 flex-col';
 
         var pair = makeCanvasWrap(
-            'cc-pdf-canvas-wrap relative flex h-full min-h-0 flex-1 overflow-hidden rounded-xl border border-zinc-200 bg-white'
+            'cc-pdf-canvas-wrap relative flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-zinc-200 bg-black'
         );
 
         var chrome = document.createElement('div');
-        chrome.className = 'cc-leaderboard-pdf-chrome shrink-0';
+        chrome.className =
+            'cc-leaderboard-pdf-chrome pointer-events-none absolute inset-x-2 top-2 z-30 flex items-center justify-end gap-2';
 
         var fsBtn = document.createElement('button');
         fsBtn.type = 'button';
+        fsBtn.id = 'cc-lb-pdf-fullscreen';
         fsBtn.className =
-            'inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white p-1.5 text-zinc-700 hover:bg-zinc-50';
+            'cc-lb-pdf-fullscreen pointer-events-auto inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white/95 p-2 text-zinc-700 shadow-sm backdrop-blur-sm hover:bg-white';
+        fsBtn.setAttribute('aria-label', 'Fullscreen');
         fsBtn.innerHTML = fullscreenIconSvg();
 
         var nav = document.createElement('div');
         nav.id = 'cc-pdf-nav';
-        nav.className = 'hidden flex flex-wrap items-center justify-between gap-2';
+        nav.className =
+            'pointer-events-auto hidden max-w-[min(100%,20rem)] flex-wrap items-center justify-end gap-2 rounded-lg border border-zinc-300/80 bg-white/95 px-2 py-1 shadow-sm backdrop-blur-sm';
         nav.innerHTML = state.isTeacher
             ? '<div class="flex items-center gap-2">' +
               '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100">Prev</button>' +
@@ -527,8 +535,8 @@
         chrome.appendChild(fsBtn);
 
         canvasArea.appendChild(pair.wrap);
+        canvasArea.appendChild(chrome);
         pdfHost.appendChild(canvasArea);
-        pdfHost.appendChild(chrome);
 
         bindFullscreen(pdfHost, fsBtn, function () {
             renderCurrent(state, [pair.canvas]);
@@ -582,26 +590,17 @@
 
         function applyLayout() {
             var showPdf = Boolean(state.live && state.hasPdf && state.numPages > 0 && state.pdf);
-            var landscape = isLandscapeTheater();
 
             pdfHost.classList.toggle('hidden', !showPdf);
             if (outerLayout) {
                 outerLayout.classList.toggle('cc-leaderboard-pdf-active', showPdf);
             }
             updateNavUi();
+            listEl.classList.remove('hidden');
 
-            if (!showPdf) {
-                listEl.classList.remove('hidden');
-                if (typeof global.ccTailwindRefresh === 'function') global.ccTailwindRefresh();
-                return;
+            if (typeof global.ccSyncTheaterLayout === 'function') {
+                global.ccSyncTheaterLayout();
             }
-
-            if (landscape) {
-                listEl.classList.remove('hidden');
-            } else {
-                listEl.classList.add('hidden');
-            }
-
             if (typeof global.ccTailwindRefresh === 'function') global.ccTailwindRefresh();
         }
 

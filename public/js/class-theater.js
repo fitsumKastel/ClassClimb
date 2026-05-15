@@ -1,12 +1,8 @@
 /**
- * Landscape theater: left student list, center PDF, right menu rail.
- * On portrait phones, request landscape and show a rotate prompt when needed.
+ * Landscape theater: overlay side navs on PDF, rotate page content in portrait (no modal).
  */
 (function (global) {
     'use strict';
-
-    var rotatePrompt = null;
-    var landscapeLockAttempted = false;
 
     function isPortrait() {
         return global.innerWidth < global.innerHeight;
@@ -24,71 +20,41 @@
         return document.body.classList.contains('cc-leaderboard-theater');
     }
 
-    function isTheaterPage() {
-        return isTeacherConsole() || isLeaderboardTheater();
-    }
-
-    function getRotatePrompt() {
-        if (!rotatePrompt) {
-            rotatePrompt = document.getElementById('cc-rotate-prompt');
+    function syncContentRotation() {
+        var portrait = isPortrait();
+        var teacherLayout = document.getElementById('cc-teacher-layout');
+        var lbWrap = document.getElementById('leaderboard-page-wrap');
+        if (teacherLayout && isTeacherConsole()) {
+            teacherLayout.classList.toggle('cc-content-rotated', portrait);
         }
-        return rotatePrompt;
-    }
-
-    function showRotatePrompt() {
-        if (!isTheaterPage() || !isPortrait()) return;
-        var el = getRotatePrompt();
-        if (!el) return;
-        el.classList.remove('hidden');
-        el.setAttribute('aria-hidden', 'false');
-    }
-
-    function hideRotatePrompt() {
-        var el = getRotatePrompt();
-        if (!el) return;
-        el.classList.add('hidden');
-        el.setAttribute('aria-hidden', 'true');
-    }
-
-    function tryLockLandscape() {
-        if (!isTheaterPage() || !isPortrait()) return;
-        var orient = global.screen && global.screen.orientation;
-        if (!orient || typeof orient.lock !== 'function') {
-            showRotatePrompt();
-            return;
+        if (lbWrap) {
+            lbWrap.classList.toggle(
+                'cc-content-rotated',
+                portrait && lbWrap.classList.contains('cc-leaderboard-pdf-active')
+            );
         }
-        orient
-            .lock('landscape')
-            .then(function () {
-                hideRotatePrompt();
-            })
-            .catch(function () {
-                showRotatePrompt();
-            });
     }
 
-    function requestLandscapeOnPhone() {
-        if (!isTheaterPage()) return;
-        if (!isPortrait()) {
-            hideRotatePrompt();
-            return;
-        }
-        if (!landscapeLockAttempted) {
-            landscapeLockAttempted = true;
-            tryLockLandscape();
-        } else {
-            showRotatePrompt();
-        }
+    function effectiveLandscape() {
+        if (isLandscapeLayout()) return true;
+        if (!isPortrait()) return false;
+        if (isTeacherConsole()) return true;
+        var lbWrap = document.getElementById('leaderboard-page-wrap');
+        return !!(lbWrap && lbWrap.classList.contains('cc-leaderboard-pdf-active'));
     }
 
     function syncTheaterClass() {
-        var on = isLandscapeLayout();
-        document.body.classList.toggle('cc-theater-landscape', on);
-        if (on) {
-            hideRotatePrompt();
-        } else if (isTheaterPage()) {
-            requestLandscapeOnPhone();
-        }
+        syncContentRotation();
+        document.body.classList.toggle('cc-theater-landscape', effectiveLandscape());
+        document.body.classList.toggle(
+            'cc-theater-portrait-rotated',
+            isPortrait() &&
+                (isTeacherConsole() ||
+                    !!(
+                        document.getElementById('leaderboard-page-wrap') &&
+                        document.getElementById('leaderboard-page-wrap').classList.contains('cc-leaderboard-pdf-active')
+                    ))
+        );
         if (typeof global.ccTailwindRefresh === 'function') {
             global.ccTailwindRefresh();
         }
@@ -118,19 +84,19 @@
         });
     }
 
+    global.ccSyncTheaterLayout = syncTheaterClass;
+
     global.addEventListener('resize', syncTheaterClass);
     global.addEventListener('orientationchange', function () {
         global.setTimeout(syncTheaterClass, 100);
     });
 
     syncTheaterClass();
-    requestLandscapeOnPhone();
     wireRailButtons();
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
             syncTheaterClass();
-            requestLandscapeOnPhone();
             wireRailButtons();
         });
     }

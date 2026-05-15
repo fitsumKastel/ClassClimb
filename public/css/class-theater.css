@@ -133,56 +133,25 @@ body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
     border-radius: 0;
 }
 
-/* Portrait phone: prompt rotation */
-.cc-rotate-prompt {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.92);
+/* Portrait phone: rotate page content (user turns device to match) */
+body.cc-theater-portrait-rotated {
+    overflow: hidden !important;
 }
 
-.cc-rotate-prompt.hidden {
-    display: none !important;
-}
-
-.cc-rotate-prompt-inner {
-    max-width: 18rem;
-    text-align: center;
-}
-
-.cc-rotate-prompt-icon {
-    width: 4rem;
-    height: 4rem;
-    margin: 0 auto 1rem;
-    color: rgb(96 165 250);
-    animation: cc-rotate-hint 2.4s ease-in-out infinite;
-}
-
-.cc-rotate-prompt-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #fff;
-}
-
-.cc-rotate-prompt-body {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.45;
-    color: rgb(161 161 170);
-}
-
-@keyframes cc-rotate-hint {
-    0%,
-    100% {
-        transform: rotate(0deg);
-    }
-    40% {
-        transform: rotate(-90deg);
-    }
+#leaderboard-page-wrap.cc-content-rotated,
+#cc-teacher-layout.cc-content-rotated {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vh !important;
+    height: 100vw !important;
+    max-width: none !important;
+    transform: rotate(90deg) !important;
+    transform-origin: top left !important;
+    margin-left: 100vw !important;
+    overflow: hidden !important;
+    z-index: 40;
+    background: #f4f4f5;
 }
 
 /* Landscape theater layout */
@@ -357,42 +326,83 @@ body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
     height: 100%;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape,
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-layout {
-    overflow: hidden;
-}
+/* Leaderboard live PDF: full-bleed stage, side navs overlay on top */
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
-    display: none !important;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-layout {
-    display: grid;
-    grid-template-columns: minmax(13rem, min(26vw, 22rem)) minmax(0, 1fr) 3.75rem;
-    grid-template-rows: minmax(0, 1fr);
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active,
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active.cc-content-rotated {
+    position: relative;
     height: 100dvh;
     max-height: 100dvh;
     min-height: 0;
+    overflow: hidden;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-left {
-    grid-column: 1;
-    grid-row: 1;
-    border-right: 1px solid rgb(228 228 231);
-    background: #f4f4f5;
+body.cc-leaderboard-theater.cc-theater-landscape #leaderboard-page-wrap.cc-leaderboard-pdf-active,
+body.cc-leaderboard-theater.cc-theater-portrait-rotated #leaderboard-page-wrap.cc-leaderboard-pdf-active {
+    overflow: hidden;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-head,
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-list-label {
+body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav,
+body.cc-leaderboard-theater.cc-theater-portrait-rotated .cc-top-nav {
+    display: none !important;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-content {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    min-height: 0;
+    min-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-stage {
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-pdf-stage {
+    margin-bottom: 0 !important;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-sidebar-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    width: min(26vw, 22rem);
+    min-width: 13rem;
+    max-width: 85vw;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgb(228 228 231 / 0.85);
+    background: rgb(244 244 245 / 0.94);
+    backdrop-filter: blur(8px);
+    box-shadow: 4px 0 24px rgb(0 0 0 / 0.06);
+    min-height: 0;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-sidebar-head,
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-sidebar-list-label {
     display: block;
     flex-shrink: 0;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-side-chrome {
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-side-chrome {
     display: none !important;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-side-students {
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-side-students {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -400,53 +410,41 @@ body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-side-students {
     -webkit-overflow-scrolling: touch;
 }
 
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-content {
-    grid-column: 2;
-    grid-row: 1;
-    min-height: 0;
-    min-width: 0;
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: none !important;
-    width: auto !important;
-    display: flex;
-    flex-direction: column;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-stage {
-    height: 100%;
-    min-height: 0;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-stage {
-    margin-bottom: 0 !important;
-    height: 100%;
-    min-height: 0;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-chrome {
-    display: none !important;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-stage .cc-pdf-canvas-wrap {
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-}
-
-body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-rail-right {
-    grid-column: 3;
-    grid-row: 1;
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-leaderboard-rail-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
     display: flex;
     width: 3.75rem;
-    flex-shrink: 0;
     flex-direction: column;
     align-items: center;
     gap: 0.35rem;
-    border-left: 1px solid rgb(228 228 231);
-    background: #f4f4f5;
+    border-left: 1px solid rgb(228 228 231 / 0.85);
+    background: rgb(244 244 245 / 0.94);
+    backdrop-filter: blur(8px);
     padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.35rem 0.5rem;
     min-height: 0;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-pdf-canvas-wrap {
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    height: 100%;
+    border-radius: 0;
+    border: none;
+    background: #000;
+}
+
+body.cc-leaderboard-theater #leaderboard-page-wrap.cc-leaderboard-pdf-active .cc-pdf-canvas-wrap canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
 }
 
 @media (orientation: landscape) {

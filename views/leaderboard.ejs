@@ -4,17 +4,6 @@
     body{background-color:#f4f4f5!important;color:#18181b!important}
 </style>
 
-<div id="cc-rotate-prompt" class="cc-rotate-prompt hidden" role="dialog" aria-modal="true" aria-labelledby="cc-rotate-prompt-title" aria-hidden="true">
-    <div class="cc-rotate-prompt-inner">
-        <svg class="cc-rotate-prompt-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <rect x="5" y="2" width="14" height="20" rx="2" />
-            <path d="M9 12h6M12 9v6" stroke-linecap="round" />
-        </svg>
-        <p id="cc-rotate-prompt-title" class="cc-rotate-prompt-title">Rotate your phone</p>
-        <p class="cc-rotate-prompt-body">Turn your device sideways for the live board layout.</p>
-    </div>
-</div>
-
 <div id="leaderboard-page-wrap" class="cc-leaderboard-layout flex min-h-screen flex-col bg-zinc-100 text-zinc-900">
     <div class="cc-leaderboard-content mx-auto w-full flex-1 px-3 py-4 sm:px-4 sm:py-6 lg:min-w-0">
         <section class="cc-leaderboard-stage flex min-h-0 flex-1 flex-col" aria-label="Class material">
@@ -246,8 +235,8 @@
 <%- JSON.stringify((students || []).map((s, i) => ({ id: s.id, xp: s.xp, rank: i + 1 }))) %>
 </script>
 <script id="leaderboard-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
-<script src="/js/class-pdf-sync.js"></script>
 <script src="/js/class-theater.js"></script>
+<script src="/js/class-pdf-sync.js"></script>
 
 <script>
 (function () {
