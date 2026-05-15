@@ -1,5 +1,5 @@
 /**
- * Landscape theater: overlay side navs on PDF, rotate page content in portrait (no modal).
+ * Teacher console: landscape layout with content rotation in portrait (no modal).
  */
 (function (global) {
     'use strict';
@@ -16,45 +16,19 @@
         return document.body.classList.contains('cc-teacher-console');
     }
 
-    function isLeaderboardTheater() {
-        return document.body.classList.contains('cc-leaderboard-theater');
-    }
-
     function syncContentRotation() {
-        var portrait = isPortrait();
         var teacherLayout = document.getElementById('cc-teacher-layout');
-        var lbWrap = document.getElementById('leaderboard-page-wrap');
         if (teacherLayout && isTeacherConsole()) {
-            teacherLayout.classList.toggle('cc-content-rotated', portrait);
+            teacherLayout.classList.toggle('cc-content-rotated', isPortrait());
         }
-        if (lbWrap) {
-            lbWrap.classList.toggle(
-                'cc-content-rotated',
-                portrait && lbWrap.classList.contains('cc-leaderboard-pdf-active')
-            );
-        }
-    }
-
-    function effectiveLandscape() {
-        if (isLandscapeLayout()) return true;
-        if (!isPortrait()) return false;
-        if (isTeacherConsole()) return true;
-        var lbWrap = document.getElementById('leaderboard-page-wrap');
-        return !!(lbWrap && lbWrap.classList.contains('cc-leaderboard-pdf-active'));
     }
 
     function syncTheaterClass() {
+        if (!isTeacherConsole()) return;
         syncContentRotation();
-        document.body.classList.toggle('cc-theater-landscape', effectiveLandscape());
-        document.body.classList.toggle(
-            'cc-theater-portrait-rotated',
-            isPortrait() &&
-                (isTeacherConsole() ||
-                    !!(
-                        document.getElementById('leaderboard-page-wrap') &&
-                        document.getElementById('leaderboard-page-wrap').classList.contains('cc-leaderboard-pdf-active')
-                    ))
-        );
+        var effectiveLandscape = isLandscapeLayout() || isPortrait();
+        document.body.classList.toggle('cc-theater-landscape', effectiveLandscape);
+        document.body.classList.toggle('cc-theater-portrait-rotated', isPortrait());
         if (typeof global.ccTailwindRefresh === 'function') {
             global.ccTailwindRefresh();
         }
@@ -69,9 +43,7 @@
         var map = [
             ['cc-rail-open-add-students', 'open-add-students-modal'],
             ['cc-rail-open-broadcast', 'open-broadcast-class-modal'],
-            ['cc-rail-open-drawer', 'class-manage-menu-btn'],
-            ['cc-lb-rail-menu', 'leaderboard-menu-btn'],
-            ['cc-lb-rail-refresh', 'leaderboard-refresh-btn']
+            ['cc-rail-open-drawer', 'class-manage-menu-btn']
         ];
         map.forEach(function (pair) {
             var rail = document.getElementById(pair[0]);

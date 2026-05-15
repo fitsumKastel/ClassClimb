@@ -427,7 +427,6 @@ app.get('/view/:classId', requireUser, (req, res) => {
                 }
 
                 function renderLeaderboardView(hasAlerts) {
-                    const pdfSyncBootstrap = buildPdfSyncData(classRow, classId);
                     res.render('leaderboard', {
                         students: students || [],
                         classId,
@@ -435,10 +434,8 @@ app.get('/view/:classId', requireUser, (req, res) => {
                         footerSchoolName,
                         hasAlerts,
                         isClassTeacher,
-                        bodyPageClass: 'cc-leaderboard-theater',
                         headerBackHref: backHref,
-                        headerBackLabel: backLabel,
-                        pdfSyncBootstrap
+                        headerBackLabel: backLabel
                     });
                 }
 
