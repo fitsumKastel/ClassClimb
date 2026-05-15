@@ -20,6 +20,14 @@
         return document.body.classList.contains('cc-teacher-console');
     }
 
+    function isLeaderboardTheater() {
+        return document.body.classList.contains('cc-leaderboard-theater');
+    }
+
+    function isTheaterPage() {
+        return isTeacherConsole() || isLeaderboardTheater();
+    }
+
     function getRotatePrompt() {
         if (!rotatePrompt) {
             rotatePrompt = document.getElementById('cc-rotate-prompt');
@@ -28,7 +36,7 @@
     }
 
     function showRotatePrompt() {
-        if (!isTeacherConsole() || !isPortrait()) return;
+        if (!isTheaterPage() || !isPortrait()) return;
         var el = getRotatePrompt();
         if (!el) return;
         el.classList.remove('hidden');
@@ -43,7 +51,7 @@
     }
 
     function tryLockLandscape() {
-        if (!isTeacherConsole() || !isPortrait()) return;
+        if (!isTheaterPage() || !isPortrait()) return;
         var orient = global.screen && global.screen.orientation;
         if (!orient || typeof orient.lock !== 'function') {
             showRotatePrompt();
@@ -60,7 +68,7 @@
     }
 
     function requestLandscapeOnPhone() {
-        if (!isTeacherConsole()) return;
+        if (!isTheaterPage()) return;
         if (!isPortrait()) {
             hideRotatePrompt();
             return;
@@ -78,7 +86,7 @@
         document.body.classList.toggle('cc-theater-landscape', on);
         if (on) {
             hideRotatePrompt();
-        } else if (isTeacherConsole()) {
+        } else if (isTheaterPage()) {
             requestLandscapeOnPhone();
         }
         if (typeof global.ccTailwindRefresh === 'function') {
@@ -95,7 +103,9 @@
         var map = [
             ['cc-rail-open-add-students', 'open-add-students-modal'],
             ['cc-rail-open-broadcast', 'open-broadcast-class-modal'],
-            ['cc-rail-open-drawer', 'class-manage-menu-btn']
+            ['cc-rail-open-drawer', 'class-manage-menu-btn'],
+            ['cc-lb-rail-menu', 'leaderboard-menu-btn'],
+            ['cc-lb-rail-refresh', 'leaderboard-refresh-btn']
         ];
         map.forEach(function (pair) {
             var rail = document.getElementById(pair[0]);

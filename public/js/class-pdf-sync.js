@@ -486,42 +486,35 @@
         var state = { boot: opts.bootstrap || {}, hasPdf: false, live: false, numPages: 0, page: 1, rev: 0, pdfUrl: '', pdf: null, isTeacher: !!opts.isTeacher };
         applyPdfSyncToState(state, state.boot);
 
-        if (listEl.parentNode && !listEl.parentNode.classList.contains('cc-leaderboard-stack')) {
-            listEl.parentNode.classList.add('cc-leaderboard-stack');
-        }
-
         var outerLayout =
-            listEl.closest('.cc-leaderboard-layout') || listEl.closest('.flex.min-h-screen');
+            root.closest('.cc-leaderboard-layout') ||
+            root.closest('#leaderboard-page-wrap') ||
+            listEl.closest('.cc-leaderboard-layout');
 
-        var pdfHost = document.createElement('div');
+        clearEl(root);
+        var pdfHost = root;
         pdfHost.id = 'cc-leaderboard-pdf-host';
-        pdfHost.className = 'cc-leaderboard-pdf-host mb-4 hidden w-full flex flex-1 min-h-0 flex-col';
-        listEl.parentNode.insertBefore(pdfHost, listEl);
+        pdfHost.className = 'cc-leaderboard-pdf-host hidden flex h-full w-full min-h-0 flex-col';
 
-        var pair = makeCanvasWrap('cc-pdf-canvas-wrap relative flex min-h-[12rem] flex-1 overflow-hidden rounded-xl border border-zinc-200 bg-white');
+        var canvasArea = document.createElement('div');
+        canvasArea.className = 'cc-leaderboard-pdf-canvas-area relative flex min-h-0 flex-1 flex-col';
 
-        var fsBar = document.createElement('div');
-        fsBar.className = 'mb-2 flex justify-end';
+        var pair = makeCanvasWrap(
+            'cc-pdf-canvas-wrap relative flex h-full min-h-0 flex-1 overflow-hidden rounded-xl border border-zinc-200 bg-white'
+        );
+
+        var chrome = document.createElement('div');
+        chrome.className = 'cc-leaderboard-pdf-chrome shrink-0';
+
         var fsBtn = document.createElement('button');
         fsBtn.type = 'button';
         fsBtn.className =
             'inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white p-1.5 text-zinc-700 hover:bg-zinc-50';
         fsBtn.innerHTML = fullscreenIconSvg();
-        fsBar.appendChild(fsBtn);
-        pdfHost.appendChild(fsBar);
-        pdfHost.appendChild(pair.wrap);
-
-        bindFullscreen(pdfHost, fsBtn, function () {
-            renderCurrent(state, [pair.canvas]);
-        });
-
-        var unwatch = watchCanvasWrap(pair.wrap, function () {
-            if (state.pdf) renderCurrent(state, [pair.canvas]);
-        });
 
         var nav = document.createElement('div');
         nav.id = 'cc-pdf-nav';
-        nav.className = 'mb-2 hidden flex flex-wrap items-center justify-between gap-2';
+        nav.className = 'hidden flex flex-wrap items-center justify-between gap-2';
         nav.innerHTML = state.isTeacher
             ? '<div class="flex items-center gap-2">' +
               '<button type="button" id="cc-pdf-prev" class="rounded-lg border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-100">Prev</button>' +
@@ -530,7 +523,20 @@
               '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-500"></span>' +
               '</div>'
             : '<span id="cc-pdf-page-label" class="text-xs tabular-nums text-zinc-500"></span>';
-        pdfHost.insertBefore(nav, pair.wrap);
+        chrome.appendChild(nav);
+        chrome.appendChild(fsBtn);
+
+        canvasArea.appendChild(pair.wrap);
+        pdfHost.appendChild(canvasArea);
+        pdfHost.appendChild(chrome);
+
+        bindFullscreen(pdfHost, fsBtn, function () {
+            renderCurrent(state, [pair.canvas]);
+        });
+
+        var unwatch = watchCanvasWrap(pair.wrap, function () {
+            if (state.pdf) renderCurrent(state, [pair.canvas]);
+        });
 
         var prevBtn = nav.querySelector('#cc-pdf-prev');
         var nextBtn = nav.querySelector('#cc-pdf-next');
@@ -578,17 +584,11 @@
             var showPdf = Boolean(state.live && state.hasPdf && state.numPages > 0 && state.pdf);
             var landscape = isLandscapeTheater();
 
+            pdfHost.classList.toggle('hidden', !showPdf);
             if (outerLayout) {
                 outerLayout.classList.toggle('cc-leaderboard-pdf-active', showPdf);
             }
-
-            pdfHost.classList.toggle('hidden', !showPdf);
             updateNavUi();
-
-            var wrap = document.getElementById('leaderboard-page-wrap');
-            if (wrap) {
-                wrap.classList.toggle('auto-rotate-landscape', showPdf);
-            }
 
             if (!showPdf) {
                 listEl.classList.remove('hidden');

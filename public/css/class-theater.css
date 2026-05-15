@@ -311,8 +311,54 @@ body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
     min-height: 0;
 }
 
-/* Leaderboard landscape PDF + roster */
-body.cc-leaderboard-theater.cc-theater-landscape {
+/* Leaderboard: portrait stack, landscape = students | full-height PDF | menu rail */
+
+.cc-leaderboard-sidebar-left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-leaderboard-sidebar-head,
+.cc-leaderboard-sidebar-list-label {
+    display: none;
+}
+
+.cc-leaderboard-rail-right {
+    display: none;
+}
+
+.cc-leaderboard-pdf-stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 12rem;
+    min-width: 0;
+}
+
+.cc-leaderboard-pdf-stage .cc-leaderboard-pdf-host {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+.cc-leaderboard-pdf-stage .cc-leaderboard-pdf-canvas-area {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-leaderboard-pdf-stage .cc-pdf-canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape,
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-layout {
     overflow: hidden;
 }
 
@@ -320,58 +366,91 @@ body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
     display: none !important;
 }
 
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-layout {
+    display: grid;
+    grid-template-columns: minmax(13rem, min(26vw, 22rem)) minmax(0, 1fr) 3.75rem;
+    grid-template-rows: minmax(0, 1fr);
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-left {
+    grid-column: 1;
+    grid-row: 1;
+    border-right: 1px solid rgb(228 228 231);
+    background: #f4f4f5;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-head,
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-sidebar-list-label {
+    display: block;
+    flex-shrink: 0;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-side-chrome {
+    display: none !important;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-side-students {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-content {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    min-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    display: flex;
+    flex-direction: column;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-stage {
+    height: 100%;
+    min-height: 0;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-stage {
+    margin-bottom: 0 !important;
+    height: 100%;
+    min-height: 0;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-chrome {
+    display: none !important;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-pdf-stage .cc-pdf-canvas-wrap {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-leaderboard-rail-right {
+    grid-column: 3;
+    grid-row: 1;
+    display: flex;
+    width: 3.75rem;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    border-left: 1px solid rgb(228 228 231);
+    background: #f4f4f5;
+    padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.35rem 0.5rem;
+    min-height: 0;
+}
+
 @media (orientation: landscape) {
     body.cc-leaderboard-theater .cc-top-nav {
         display: none !important;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active {
-        height: 100dvh;
-        max-height: 100dvh;
-        overflow: hidden;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active > .mx-auto {
-        flex: 1;
-        min-height: 0;
-        max-width: none !important;
-        width: 100% !important;
-        padding: 0.25rem 0 !important;
-        margin: 0 !important;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack {
-        display: grid;
-        height: 100%;
-        min-height: 0;
-        grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
-        grid-template-rows: auto auto minmax(0, 1fr);
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host {
-        grid-column: 1;
-        grid-row: 1 / -1;
-        display: flex !important;
-        flex-direction: column;
-        margin-bottom: 0 !important;
-        min-height: 0;
-        height: 100%;
-        padding: 0 0.35rem;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host .cc-pdf-canvas-wrap {
-        flex: 1;
-        min-height: 0;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack > :not(.cc-leaderboard-pdf-host):not(#leaderboard-list) {
-        grid-column: 2;
-    }
-
-    .cc-leaderboard-layout.cc-leaderboard-pdf-active #leaderboard-list {
-        grid-column: 2;
-        grid-row: 3;
-        min-height: 0;
-        overflow-y: auto;
     }
 }
