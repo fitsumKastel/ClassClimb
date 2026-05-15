@@ -1,9 +1,29 @@
 <%- include('partials/header') %>
-<style>body{background-color:#f4f4f5!important;color:#18181b!important}</style>
+<style>
+    body{background-color:#f4f4f5!important;color:#18181b!important}
+    @media screen and (max-width: 1023px) and (orientation: portrait) {
+        .auto-rotate-landscape {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vh !important;
+            height: 100vw !important;
+            transform: rotate(90deg) !important;
+            transform-origin: top left !important;
+            margin-top: 0 !important;
+            margin-left: 100vw !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            z-index: 9999;
+            background: #f4f4f5;
+        }
+    }
+</style>
 
 <div class="flex min-h-screen flex-col bg-zinc-100 text-zinc-900">
-    <div class="mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-4 lg:py-6 lg:w-[30%] lg:min-w-0">
-        <div class="w-full pt-2 sm:pt-4">
+    <div id="leaderboard-page-wrap" class="mx-auto flex w-full flex-1 flex-col px-3 py-4 sm:px-4 lg:py-6 lg:max-w-7xl">
+        <div class="flex flex-col lg:flex-row gap-6 w-full pt-2 sm:pt-4">
+            <div id="leaderboard-main-content" class="flex-1 min-w-0">
             <% if (typeof isClassTeacher === 'undefined' || !isClassTeacher) { %>
                 <% if (!hasAlerts) { %>
                     <div class="mb-6 sm:mb-8">
@@ -59,49 +79,48 @@
                     </button>
                 </div>
             </div>
-            <div
-                class="cc-ad-slot mb-4 min-h-[5.5rem] rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50"
-                data-ad-slot="leaderboard-top"
-                aria-label="Advertisement"
-            ></div>
-            <div id="leaderboard-list" class="<%= students && students.length > 0 ? 'space-y-1.5' : '' %>">
-                <% if (students && students.length > 0) { %>
-                    <% students.forEach((student, index) => { %>
-                        <% var _rk = index + 1; %>
-                        <% var isTop3 = _rk <= 3; %>
-                        <% var medalColor = _rk === 1 ? 'text-amber-500' : _rk === 2 ? 'text-zinc-400' : _rk === 3 ? 'text-amber-700' : 'text-zinc-400'; %>
-                        <% var rowBg = isTop3 ? 'bg-white ring-1 ring-zinc-200 shadow-sm' : 'bg-white ring-1 ring-zinc-100'; %>
-                        <div
-                            class="flex items-center gap-3 rounded-xl px-3.5 py-3 transition sm:px-4 sm:py-3.5 <%= rowBg %>"
-                            data-student-id="<%= student.id %>"
-                        >
-                            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full <%= isTop3 ? 'bg-gradient-to-b from-amber-50 to-amber-100/60' : 'bg-zinc-100' %>">
-                                <% if (_rk === 1) { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
-                                <% } else if (_rk === 2) { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
-                                <% } else if (_rk === 3) { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-700" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
-                                <% } else { %>
-                                    <span class="text-xs font-bold tabular-nums text-zinc-500"><%= _rk %></span>
-                                <% } %>
-                            </div>
-                            <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
-                                <span class="break-words text-sm font-semibold text-zinc-900"><%= student.name %></span>
-                                <div
-                                    class="shrink-0 rounded-full bg-zinc-50 px-2.5 py-1 ring-1 ring-zinc-200/80 transition-[background-color,box-shadow] duration-200 motion-reduce:transition-none"
-                                >
-                                    <span class="inline-block text-xs font-bold tabular-nums text-zinc-600"><%= student.xp %> XP</span>
+            </div>
+
+            <aside id="leaderboard-sidebar" class="w-full lg:w-80 shrink-0 lg:sticky lg:top-6">
+                <div id="leaderboard-list" class="<%= students && students.length > 0 ? 'space-y-1.5' : '' %>">
+                    <% if (students && students.length > 0) { %>
+                        <% students.forEach((student, index) => { %>
+                            <% var _rk = index + 1; %>
+                            <% var isTop3 = _rk <= 3; %>
+                            <% var medalColor = _rk === 1 ? 'text-amber-500' : _rk === 2 ? 'text-zinc-400' : _rk === 3 ? 'text-amber-700' : 'text-zinc-400'; %>
+                            <% var rowBg = isTop3 ? 'bg-white ring-1 ring-zinc-200 shadow-sm' : 'bg-white ring-1 ring-zinc-100'; %>
+                            <div
+                                class="flex items-center gap-3 rounded-xl px-3.5 py-3 transition sm:px-4 sm:py-3.5 <%= rowBg %>"
+                                data-student-id="<%= student.id %>"
+                            >
+                                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full <%= isTop3 ? 'bg-gradient-to-b from-amber-50 to-amber-100/60' : 'bg-zinc-100' %>">
+                                    <% if (_rk === 1) { %>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                    <% } else if (_rk === 2) { %>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                    <% } else if (_rk === 3) { %>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-700" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6z"/></svg>
+                                    <% } else { %>
+                                        <span class="text-xs font-bold tabular-nums text-zinc-500"><%= _rk %></span>
+                                    <% } %>
+                                </div>
+                                <div class="flex min-w-0 flex-1 items-center justify-between gap-3">
+                                    <span class="break-words text-sm font-semibold text-zinc-900"><%= student.name %></span>
+                                    <div
+                                        class="shrink-0 rounded-full bg-zinc-50 px-2.5 py-1 ring-1 ring-zinc-200/80 transition-[background-color,box-shadow] duration-200 motion-reduce:transition-none"
+                                    >
+                                        <span class="inline-block text-xs font-bold tabular-nums text-zinc-600"><%= student.xp %> XP</span>
+                                    </div>
                                 </div>
                             </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="rounded-xl bg-white p-6 text-center ring-1 ring-zinc-200">
+                            <p class="text-sm text-zinc-400">No students in this class yet.</p>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <div class="rounded-xl bg-white p-6 text-center ring-1 ring-zinc-200">
-                        <p class="text-sm text-zinc-400">No students in this class yet.</p>
-                    </div>
-                <% } %>
-            </div>
+                    <% } %>
+                </div>
+            </aside>
         </div>
     </div>
 </div>
@@ -474,11 +493,12 @@
     } catch (lbPdfErr) {
         bootPdfLb = {};
     }
-    if (typeof ClassPdfSync !== 'undefined' && container && container.parentElement) {
+    var lbMain = document.getElementById('leaderboard-main-content');
+    if (typeof ClassPdfSync !== 'undefined' && container && lbMain) {
         ClassPdfSync.initLeaderboard({
             classId: classId,
             bootstrap: bootPdfLb,
-            leaderboardRoot: container.parentElement,
+            leaderboardRoot: lbMain,
             listContainer: container,
             isTeacher: typeof isClassTeacher !== 'undefined' && isClassTeacher
         }).then(function (ctl) {

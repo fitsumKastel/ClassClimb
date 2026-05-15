@@ -32,7 +32,7 @@
         var wrap = document.createElement('div');
         wrap.className = className || 'relative w-full overflow-hidden rounded-lg border border-zinc-800 bg-[#0a0a0a]';
         var canvas = document.createElement('canvas');
-        canvas.className = 'mx-auto block max-h-[min(70vh,520px)] w-auto max-w-full';
+        canvas.className = 'mx-auto block max-h-[min(85vh,720px)] w-auto max-w-full';
         wrap.appendChild(canvas);
         return { wrap: wrap, canvas: canvas };
     }
@@ -412,6 +412,12 @@
                 Boolean(state.live && state.hasPdf && state.numPages > 0 && state.pdf);
             pdfHost.classList.toggle('hidden', !showPdf);
             updateNavUi();
+
+            var wrap = document.getElementById('leaderboard-page-wrap');
+            if (wrap) {
+                wrap.classList.toggle('auto-rotate-landscape', showPdf);
+            }
+
             // listEl.classList.toggle('hidden', showPdf); // Keep list visible below PDF
             if (typeof global.ccTailwindRefresh === 'function') global.ccTailwindRefresh();
         }
