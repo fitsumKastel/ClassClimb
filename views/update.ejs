@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>ClassClimb — Updating</title>
+    <link rel="icon" href="/asset/xp.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+        html,
+        body {
+            min-height: 100dvh;
+            font-family: 'Noto Sans', sans-serif;
+            background: #f4f4f5;
+            color: #18181b;
+        }
+        .wrap {
+            display: flex;
+            min-height: 100dvh;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            width: 100%;
+            max-width: 22rem;
+            border-radius: 1rem;
+            border: 1px solid #e4e4e7;
+            background: #fff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 24px rgb(0 0 0 / 0.06);
+        }
+        .logo {
+            display: inline-flex;
+            height: 3rem;
+            width: 3rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            margin-bottom: 1rem;
+        }
+        .logo svg {
+            height: 1.5rem;
+            width: 1.5rem;
+            color: #d97706;
+        }
+        h1 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .msg {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #52525b;
+        }
+        .spinner {
+            width: 2rem;
+            height: 2rem;
+            margin: 1.25rem auto 0;
+            border: 3px solid #e4e4e7;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.85s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .badge {
+            display: inline-block;
+            margin-top: 1.25rem;
+            border-radius: 9999px;
+            background: #eff6ff;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #1d4ed8;
+        }
+        .retry {
+            display: inline-flex;
+            margin-top: 1.25rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid #d4d4d8;
+            background: #fff;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #3f3f46;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .retry:hover {
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <main class="card" role="status" aria-live="polite">
+            <span class="logo" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg>
+            </span>
+            <h1>Updating ClassClimb</h1>
+            <p class="msg"><%= typeof updateMessage === 'string' ? updateMessage : 'We are rolling out an update. The app will be back shortly.' %></p>
+            <div class="spinner" aria-hidden="true"></div>
+            <p class="badge">Update in progress</p>
+            <button type="button" class="retry" onclick="location.reload()">Check again</button>
+        </main>
+    </div>
+</body>
+</html>

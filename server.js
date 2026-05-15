@@ -49,6 +49,7 @@ const { telegramAppStartUrl, seedLinkbotSiteSecretFromEnv } = require('./lib/lin
 const { requireUser, safeReturnPath } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const classRoutes = require('./routes/class');
+const { appUpdateModeMiddleware, isAppUpdateMode } = require('./lib/app-update-mode');
 
 const app = express();
 
@@ -120,6 +121,8 @@ app.use((req, res, next) => {
         'flex w-full cursor-pointer items-center justify-start gap-3 border-0 bg-transparent py-3 px-1 text-left text-base font-normal text-white [-webkit-appearance:none] [appearance:none] transition hover:opacity-80 font-inherit';
     next();
 });
+
+app.use(appUpdateModeMiddleware);
 
 app.use('/auth', authRoutes);
 app.use('/class', classRoutes);
@@ -490,6 +493,9 @@ initRealtime(httpServer, sessionStore, {
         await seedLinkbotSiteSecretFromEnv();
         httpServer.listen(PORT, '0.0.0.0', () => {
             console.log(`ClassClimb is listening on port ${PORT}`);
+            if (isAppUpdateMode()) {
+                console.log('APP_UPDATE_MODE is on — visitors see the update page (set APP_UPDATE_MODE=0 to open the app).');
+            }
         });
     } catch (err) {
         console.error('ClassClimb startup failed:', err && err.message ? err.message : err);
