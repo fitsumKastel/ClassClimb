@@ -1,0 +1,377 @@
+/* Teacher console: landscape = left students, center PDF, right menu rail. */
+
+body.cc-teacher-console.cc-theater-landscape,
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
+    overflow: hidden;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-top-nav,
+body.cc-teacher-console.cc-theater-landscape header.cc-top-nav {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.cc-teacher-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 4rem);
+}
+
+.cc-teacher-sidebar-left {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-teacher-sidebar-head {
+    display: none;
+}
+
+.cc-teacher-sidebar-list-label {
+    display: none;
+}
+
+.cc-teacher-rail-right {
+    display: none;
+}
+
+.cc-teacher-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+.cc-teacher-stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-teacher-pdf-stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 12rem;
+    min-width: 0;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-viewer-root {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-viewer-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    gap: 0.5rem;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-canvas-host {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-canvas-wrap {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(39 39 42);
+    background: #000;
+}
+
+.cc-teacher-pdf-stage .cc-pdf-canvas-wrap canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+.cc-pdf-stage--fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 150;
+    margin: 0 !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    height: 100dvh !important;
+    background: #000;
+}
+
+.cc-pdf-stage--fullscreen .cc-pdf-viewer-root,
+.cc-pdf-stage--fullscreen .cc-pdf-viewer-body,
+.cc-pdf-stage--fullscreen .cc-pdf-canvas-host,
+.cc-pdf-stage--fullscreen .cc-pdf-canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.cc-pdf-stage--fullscreen .cc-pdf-canvas-wrap {
+    border: none;
+    border-radius: 0;
+}
+
+/* Portrait phone: prompt rotation */
+.cc-rotate-prompt {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.92);
+}
+
+.cc-rotate-prompt.hidden {
+    display: none !important;
+}
+
+.cc-rotate-prompt-inner {
+    max-width: 18rem;
+    text-align: center;
+}
+
+.cc-rotate-prompt-icon {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    color: rgb(96 165 250);
+    animation: cc-rotate-hint 2.4s ease-in-out infinite;
+}
+
+.cc-rotate-prompt-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.cc-rotate-prompt-body {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: rgb(161 161 170);
+}
+
+@keyframes cc-rotate-hint {
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+    40% {
+        transform: rotate(-90deg);
+    }
+}
+
+/* Landscape theater layout */
+@media (orientation: landscape) {
+    body.cc-teacher-console .cc-top-nav {
+        display: none !important;
+    }
+
+    body.cc-teacher-console {
+        overflow: hidden;
+    }
+}
+
+body.cc-teacher-console.cc-theater-landscape,
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
+    height: 100dvh;
+    max-height: 100dvh;
+    min-height: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-layout {
+    display: grid;
+    grid-template-columns: minmax(13rem, min(26vw, 22rem)) minmax(0, 1fr) 3.75rem;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-left {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid rgb(39 39 42);
+    background: #000;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-content {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-head {
+    display: flex;
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-sidebar-list-label {
+    display: block;
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-side-top {
+    flex-shrink: 0;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid rgb(39 39 42 / 0.85);
+    padding-bottom: 0.75rem !important;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-side-students {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-content {
+    min-height: 0;
+    min-width: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    display: flex;
+    flex-direction: column;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-stage {
+    height: 100%;
+    min-height: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-portrait-title {
+    display: none !important;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage {
+    margin-bottom: 0 !important;
+    height: 100%;
+    min-height: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-viewer-root {
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    background: #000;
+    padding: 0.35rem;
+    box-shadow: none;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-toolbar-block {
+    flex-shrink: 0;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-pdf-stage .cc-pdf-toolbar-block.cc-pdf-toolbar-upload {
+    display: none;
+}
+
+body.cc-teacher-console.cc-theater-landscape .cc-teacher-rail-right {
+    display: flex;
+    width: 3.75rem;
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    border-left: 1px solid rgb(39 39 42);
+    background: #000;
+    padding: max(0.5rem, env(safe-area-inset-top, 0px)) 0.35rem 0.5rem;
+    min-height: 0;
+}
+
+/* Leaderboard landscape PDF + roster */
+body.cc-leaderboard-theater.cc-theater-landscape {
+    overflow: hidden;
+}
+
+body.cc-leaderboard-theater.cc-theater-landscape .cc-top-nav {
+    display: none !important;
+}
+
+@media (orientation: landscape) {
+    body.cc-leaderboard-theater .cc-top-nav {
+        display: none !important;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active {
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active > .mx-auto {
+        flex: 1;
+        min-height: 0;
+        max-width: none !important;
+        width: 100% !important;
+        padding: 0.25rem 0 !important;
+        margin: 0 !important;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack {
+        display: grid;
+        height: 100%;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr) minmax(13rem, min(22rem, 34vw));
+        grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host {
+        grid-column: 1;
+        grid-row: 1 / -1;
+        display: flex !important;
+        flex-direction: column;
+        margin-bottom: 0 !important;
+        min-height: 0;
+        height: 100%;
+        padding: 0 0.35rem;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-pdf-host .cc-pdf-canvas-wrap {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active .cc-leaderboard-stack > :not(.cc-leaderboard-pdf-host):not(#leaderboard-list) {
+        grid-column: 2;
+    }
+
+    .cc-leaderboard-layout.cc-leaderboard-pdf-active #leaderboard-list {
+        grid-column: 2;
+        grid-row: 3;
+        min-height: 0;
+        overflow-y: auto;
+    }
+}

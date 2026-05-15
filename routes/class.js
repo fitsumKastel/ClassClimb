@@ -81,6 +81,7 @@ router.get('/manage/:id', (req, res) => {
                     students: students || [],
                     bulkFormNonce,
                     pdfSyncBootstrap,
+                    bodyPageClass: 'cc-teacher-console',
                     headerBackHref: '/',
                     headerBackLabel: 'Back to classes'
                 });
