@@ -3,9 +3,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../lib/db');
 const { requireUser } = require('../middleware/auth');
-const { broadcastXP } = require('../lib/linkbot');
+const { broadcastXP, broadcastClassMessage } = require('../lib/linkbot');
 const { broadcastLeaderboard, broadcastClassAnnouncement } = require('../lib/realtime');
 const { formatStudentName } = require('../lib/format-student-name');
+const { formatClassLabel } = require('../lib/format-class-label');
 const { v4: uuidv4 } = require('uuid');
 
 router.use(requireUser);
@@ -86,7 +87,17 @@ router.post('/create', (req, res) => {
 
     delete req.session.createClassNonce;
 
-    const { className, schoolName } = req.body;
+    const className = formatClassLabel(typeof req.body.className === 'string' ? req.body.className : '');
+    const schoolName = formatClassLabel(typeof req.body.schoolName === 'string' ? req.body.schoolName : '');
+    if (!className || !schoolName) {
+        if (wantsJson) {
+            res.status(400).json({ ok: false, error: 'name_required' });
+            return;
+        }
+        res.redirect(303, '/class/start-teaching');
+        return;
+    }
+
     const teacherId = req.session.user_id;
     const viewId = uuidv4().substring(0, 8); // Short unique ID for the URL
 
@@ -303,10 +314,12 @@ router.post('/broadcast-message', (req, res) => {
             return;
         }
         const rawMsg = req.body && req.body.message;
-        if (!broadcastClassAnnouncement(classId, rawMsg)) {
+        const delivered = broadcastClassAnnouncement(classId, rawMsg);
+        if (!delivered) {
             res.status(400).json({ ok: false, error: 'empty_message' });
             return;
         }
+        broadcastClassMessage(classId, delivered);
         res.json({ ok: true });
     });
 });

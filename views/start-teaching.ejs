@@ -8,18 +8,20 @@
                 <input
                     type="text"
                     name="className"
-                    placeholder="Class Name (e.g. 10B Math)"
+                    placeholder="CLASS NAME (e.g. 10B MATH)"
                     required
                     autocomplete="off"
-                    class="w-full select-text bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
+                    data-uppercase-input
+                    class="w-full select-text uppercase bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
                 >
                 <input
                     type="text"
                     name="schoolName"
-                    placeholder="School Name"
+                    placeholder="SCHOOL NAME"
                     required
                     autocomplete="off"
-                    class="w-full select-text bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
+                    data-uppercase-input
+                    class="w-full select-text uppercase bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
                 >
                 <button
                     type="submit"
@@ -32,4 +34,5 @@
     </div>
 </div>
 
+<script src="/js/uppercase-input.js" defer></script>
 <%- include('partials/footer') %>
