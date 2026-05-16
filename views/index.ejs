@@ -114,22 +114,28 @@
             aria-labelledby="teacher-create-heading"
         >
             <div class="pointer-events-none absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500 opacity-90" aria-hidden="true"></div>
-            <div class="p-5 sm:p-6">
-                <div class="mb-5 flex items-center gap-3">
+            <div class="px-4 py-5 sm:px-6 sm:py-6">
+                <div class="mb-6 flex gap-4">
                     <span
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-400"
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-400"
                         aria-hidden="true"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 5v14M5 12h14" />
                         </svg>
                     </span>
-                    <div class="min-w-0">
-                        <h2 id="teacher-create-heading" class="text-base font-semibold tracking-tight text-white">Create a class</h2>
+                    <div class="min-w-0 flex-1 space-y-1.5 pt-0.5">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Get started</p>
+                        <h2 id="teacher-create-heading" class="text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
+                            Create your class
+                        </h2>
+                        <p class="text-sm leading-relaxed text-zinc-500">
+                            Set up a class to get a share link for students.
+                        </p>
                     </div>
                 </div>
                 <p id="create-class-error" class="mb-4 hidden rounded-xl border border-red-900/45 bg-red-950/35 px-3 py-2.5 text-sm text-red-200"></p>
-                <form id="create-class-form" action="/class/create" method="POST" class="space-y-4" autocomplete="off">
+                <form id="create-class-form" action="/class/create" method="POST" class="space-y-4 border-t border-zinc-800/80 pt-5" autocomplete="off">
                     <input type="hidden" name="_formNonce" value="<%= formNonce %>">
                     <div class="space-y-1.5">
                         <label for="create-class-name" class="text-xs font-medium uppercase tracking-wide text-zinc-500">Class name</label>

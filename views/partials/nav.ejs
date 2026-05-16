@@ -134,15 +134,15 @@
             </div>
         </div>
         <% if (showHeaderContext) { %>
-            <div class="mt-3 min-w-0 border-t border-zinc-800/80 pt-3">
+            <div class="mt-4 min-w-0 border-t border-zinc-800/80 px-0.5 pt-4">
                 <% if (navEyebrow) { %>
                     <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500"><%= navEyebrow %></p>
                 <% } %>
                 <% if (navTitle) { %>
-                    <p class="mt-0.5 truncate text-base font-semibold text-white"><%= navTitle %></p>
+                    <h1 class="mt-1.5 truncate text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl"><%= navTitle %></h1>
                 <% } %>
                 <% if (navSubtitle) { %>
-                    <p class="mt-0.5 truncate text-sm text-zinc-500"><%= navSubtitle %></p>
+                    <p class="mt-1.5 max-w-xl text-sm leading-relaxed text-zinc-500"><%= navSubtitle %></p>
                 <% } %>
             </div>
         <% } %>
