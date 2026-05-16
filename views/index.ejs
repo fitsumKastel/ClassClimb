@@ -106,6 +106,7 @@
                 <% } %>
             </div>
         <% } else if (typeof isTeacher !== 'undefined' && isTeacher) { %>
+        <% var pageBase = typeof pageBase !== 'undefined' && pageBase ? pageBase : '/'; %>
 
         <!-- Teacher: create class -->
         <section
@@ -243,7 +244,7 @@
                 <nav class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-zinc-800/80 pt-3 text-sm" aria-label="Class list pages">
                     <% if (classesPage > 1) { %>
                         <a
-                            href="/?page=<%= classesPage - 1 %>"
+                            href="<%= pageBase %>?page=<%= classesPage - 1 %>"
                             class="rounded-xl border border-zinc-700 bg-zinc-900/50 px-4 py-2 font-medium text-zinc-200 transition hover:border-blue-500/40 hover:text-white"
                         >
                             Previous
@@ -254,7 +255,7 @@
                     <span class="text-xs font-medium tabular-nums text-zinc-500">Page <%= classesPage %> / <%= classesTotalPages %></span>
                     <% if (classesPage < classesTotalPages) { %>
                         <a
-                            href="/?page=<%= classesPage + 1 %>"
+                            href="<%= pageBase %>?page=<%= classesPage + 1 %>"
                             class="rounded-xl border border-zinc-700 bg-zinc-900/50 px-4 py-2 font-medium text-zinc-200 transition hover:border-blue-500/40 hover:text-white"
                         >
                             Next
