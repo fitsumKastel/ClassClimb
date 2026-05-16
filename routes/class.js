@@ -12,7 +12,7 @@ const { v4: uuidv4 } = require('uuid');
 router.use(requireUser);
 
 router.get('/start-teaching', (req, res) => {
-    res.redirect(303, '/teacher');
+    res.redirect(303, '/');
 });
 
 function canManageClass(classInfo, userId) {
@@ -94,7 +94,7 @@ router.post('/create', (req, res) => {
             res.status(400).json({ ok: false, error: 'name_required' });
             return;
         }
-        res.redirect(303, '/class/start-teaching');
+        res.redirect(303, '/');
         return;
     }
 

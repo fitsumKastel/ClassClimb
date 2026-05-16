@@ -125,30 +125,9 @@ app.use(appUpdateModeMiddleware);
 app.use('/auth', authRoutes);
 app.use('/class', classRoutes);
 
-// First class setup (signed-in, no classes yet)
+// Legacy URL — same teacher home as / (create class + class list).
 app.get('/teacher', requireUser, (req, res) => {
-    const teacherId = String(req.session.user_id);
-    db.get('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?', [teacherId], (err, row) => {
-        if (err) {
-            res.status(500).send('Could not verify account.');
-            return;
-        }
-        const n = row && row.n != null ? Number(row.n) : 0;
-        if (n > 0) {
-            res.redirect(303, '/');
-            return;
-        }
-        const formNonce = crypto.randomBytes(32).toString('hex');
-        req.session.createClassNonce = formNonce;
-        res.render('start-teaching', {
-            formNonce,
-            headerBackHref: '/',
-            headerBackLabel: 'Back to home',
-            headerEyebrow: 'Get started',
-            headerTitle: 'Create your class',
-            headerSubtitle: 'Set up a class to get a share link for students.'
-        });
-    });
+    res.redirect(303, '/');
 });
 
 // Home: guest landing vs signed-in teacher dashboard
@@ -264,11 +243,26 @@ app.get('/', (req, res) => {
                     return;
                 }
                 const ownedCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
-                if (ownedCount === 0) {
-                    renderStudentHome(teacherId);
+                if (ownedCount > 0) {
+                    renderTeacherDashboard(teacherId);
                     return;
                 }
-                renderTeacherDashboard(teacherId);
+                db.get(
+                    'SELECT COUNT(*) AS n FROM subscriptions WHERE telegram_id = ?',
+                    [teacherId],
+                    (subErr, subRow) => {
+                        if (subErr) {
+                            res.status(500).send('Failed to load account.');
+                            return;
+                        }
+                        const subCount = subRow && subRow.n != null ? Number(subRow.n) : 0;
+                        if (subCount > 0) {
+                            renderStudentHome(teacherId);
+                            return;
+                        }
+                        renderTeacherDashboard(teacherId);
+                    }
+                );
             }
         );
     }
