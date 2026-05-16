@@ -492,7 +492,7 @@ initRealtime(httpServer, sessionStore, {
         httpServer.listen(PORT, '0.0.0.0', () => {
             console.log(`ClassClimb is listening on port ${PORT}`);
             if (isAppUpdateMode()) {
-                console.log('APP_UPDATE_MODE is on — visitors see the update page (set APP_UPDATE_MODE=0 to open the app).');
+                console.log('APP_UPDATE_MODE is on — visitors see the update page (set APP_UPDATE_MODE=0 when done).');
             }
         });
     } catch (err) {
