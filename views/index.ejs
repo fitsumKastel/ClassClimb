@@ -2,7 +2,7 @@
 
 <% var guestLanding = typeof signedIn !== 'undefined' && !signedIn; %>
 <div class="bg-[#000] text-white flex flex-col items-center px-3 sm:px-4 <%= guestLanding ? 'min-h-[calc(100svh-4rem)] py-6 sm:py-8' : 'min-h-screen justify-start py-4 lg:py-6' %>">
-    <div class="w-full lg:w-[30%] lg:min-w-0 <%= guestLanding ? 'my-auto' : '' %>">
+    <div class="w-full max-w-lg mx-auto <%= guestLanding ? 'my-auto max-w-md' : '' %>">
         <% if (typeof error !== 'undefined' && error) { %>
             <div
                 id="cc-error-modal"

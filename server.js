@@ -35,12 +35,10 @@ const fs = require('fs');
     push(alt);
 })();
 
-require('./lib/copy-pdf-vendor').copyPdfjsVendorFiles(__dirname);
-
 const crypto = require('crypto');
 const http = require('http');
 const express = require('express');
-const { initRealtime, buildPdfSyncData } = require('./lib/realtime');
+const { initRealtime } = require('./lib/realtime');
 const session = require('express-session');
 const SqliteSessionStore = require('./lib/sqlite-session-store');
 const { getSessionsDir } = require('./lib/storage-paths');

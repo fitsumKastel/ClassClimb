@@ -1,47 +1,11 @@
 <%- include('partials/header') %>
-<link rel="stylesheet" href="/css/class-theater.css" />
+<div id="cc-teacher-layout" class="mx-auto w-full max-w-2xl bg-[#000] px-4 pb-10 pt-2 text-white">
+    <section aria-labelledby="student-list-heading">
+        <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
 
-<div id="cc-teacher-layout" class="cc-teacher-layout bg-[#000] text-white">
-    <div class="cc-teacher-content mx-auto w-full flex-1 px-3 py-4 pb-8 sm:px-4 sm:py-6 lg:min-w-0">
-        <section class="cc-teacher-stage flex min-h-0 flex-1 flex-col" aria-labelledby="student-list-heading">
-            <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
-            <p
-                class="cc-teacher-portrait-title mb-3 max-w-full break-words text-center text-[10px] leading-tight tracking-tight text-zinc-600 sm:mb-4"
-                title="Teacher console · <%= classInfo.class_name %><%= classInfo.school_name ? ' · ' + classInfo.school_name : '' %>"
-            >
-                Teacher console · <%= classInfo.class_name %><% if (classInfo.school_name) { %> · <%= classInfo.school_name %><% } %>
-            </p>
-            <div id="cc-teacher-pdf-stage" class="cc-teacher-pdf-stage mb-3 min-h-0 w-full">
-                <div id="cc-teacher-pdf-root" class="flex min-h-0 w-full flex-1 flex-col"></div>
-            </div>
-        </section>
-    </div>
-    <aside class="cc-teacher-sidebar-left" aria-label="Students">
-        <header class="cc-teacher-sidebar-head flex items-start gap-2 border-b border-zinc-800/85 px-3 py-3">
-            <a
-                href="<%= typeof headerBackHref !== 'undefined' && headerBackHref ? headerBackHref : '/' %>"
-                id="cc-sidebar-back"
-                class="cc-teacher-sidebar-back order-2 ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-700 text-zinc-300 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                title="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
-                aria-label="<%= typeof headerBackLabel !== 'undefined' && headerBackLabel ? headerBackLabel : 'Back' %>"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-            </a>
-            <div class="cc-teacher-sidebar-brand flex min-w-0 flex-1 items-center gap-3">
-                <span class="cc-teacher-sidebar-avatar inline-flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-700 bg-zinc-900">
-                    <img src="/asset/xp.png" alt="" class="h-7 w-7 object-contain" width="28" height="28" />
-                </span>
-                <div class="min-w-0">
-                    <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Class</p>
-                    <p class="truncate text-sm font-semibold text-zinc-100" title="<%= classInfo.class_name %>"><%= classInfo.class_name %></p>
-                    <% if (classInfo.school_name) { %>
-                        <p class="truncate text-[11px] text-zinc-500" title="<%= classInfo.school_name %>"><%= classInfo.school_name %></p>
-                    <% } %>
-                </div>
-            </div>
-        </header>
-        <p class="cc-teacher-sidebar-list-label px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Student list</p>
-        <div class="cc-teacher-side-top mb-3 px-3">
+        <div class="sticky top-0 z-20 -mx-4 border-b border-zinc-800/80 bg-pure-black/95 px-4 pb-3 pt-1 backdrop-blur-sm">
+            <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Students</p>
+            <div class="cc-teacher-side-top">
                 <input
                     type="text"
                     id="student-search"
@@ -70,7 +34,10 @@
                 </div>
                 </div>
             </div>
-        <div id="student-xp-list" class="cc-teacher-side-students min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
+        </div>
+
+        <p class="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Award XP</p>
+        <div id="student-xp-list" class="cc-teacher-side-students mt-2 space-y-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
                 <% if (students.length === 0) { %>
                     <p class="rounded-xl border border-zinc-800 bg-[#111] px-3 py-6 text-center text-sm text-zinc-500 sm:px-4 sm:py-8">
                         No students yet.
@@ -117,56 +84,25 @@
                             class="mt-3 rounded-xl border border-zinc-800/80 bg-[#0a0a0a] p-2.5"
                             aria-label="Adjust experience points"
                         >
-                            <div class="flex flex-row flex-wrap items-stretch gap-2 sm:gap-0">
-                                <div class="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-1.5 sm:px-1">
-                                    <% [-10, -5].forEach((points) => { %>
+                            <div class="grid grid-cols-4 gap-2">
+                                    <% [-10, -5, 5, 10].forEach((points) => { %>
+                                        <% const isNeg = points < 0; %>
                                         <button
                                             type="button"
-                                            class="xp-award-btn min-w-[3.25rem] rounded-lg border border-rose-500/25 bg-rose-950/40 px-2 py-2 text-center text-sm font-semibold tabular-nums text-rose-200 shadow-sm transition hover:border-rose-400/40 hover:bg-rose-950/65 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/35 active:scale-[0.97]"
+                                            class="xp-award-btn flex min-h-11 items-center justify-center rounded-lg border px-2 text-center text-sm font-semibold tabular-nums shadow-sm transition active:scale-[0.97] focus:outline-none focus-visible:ring-2 <%= isNeg ? 'border-rose-500/25 bg-rose-950/40 text-rose-200 hover:border-rose-400/40 hover:bg-rose-950/65 hover:text-rose-100 focus-visible:ring-rose-500/35' : 'border-emerald-500/25 bg-emerald-950/40 text-emerald-200 hover:border-emerald-400/40 hover:bg-emerald-950/65 hover:text-emerald-100 focus-visible:ring-emerald-500/35' %>"
                                             data-points="<%= points %>"
                                         >
-                                            <%= points %>
+                                            <%= points > 0 ? '+' + points : points %>
                                         </button>
                                     <% }) %>
                                 </div>
-                                <div
-                                    class="mx-1 w-px shrink-0 self-stretch bg-zinc-800 sm:mx-2"
-                                    aria-hidden="true"
-                                ></div>
-                                <div class="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5 sm:px-1">
-                                    <% [5, 10].forEach((points) => { %>
-                                        <button
-                                            type="button"
-                                            class="xp-award-btn min-w-[3.25rem] rounded-lg border border-emerald-500/25 bg-emerald-950/40 px-2 py-2 text-center text-sm font-semibold tabular-nums text-emerald-200 shadow-sm transition hover:border-emerald-400/40 hover:bg-emerald-950/65 hover:text-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35 active:scale-[0.97]"
-                                            data-points="<%= points %>"
-                                        >
-                                            +<%= points %>
-                                        </button>
-                                    <% }) %>
-                                </div>
-                            </div>
-                        </div>
 
                         <div id="status-<%= student.id %>" class="mt-2 min-h-0"></div>
                     </div>
                 <% }) %>
         </div>
-    </aside>
-    <aside class="cc-teacher-rail-right" aria-label="Class tools">
-        <a href="/" class="mb-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-[10px] font-black italic leading-none text-white transition hover:bg-zinc-900" title="ClassClimb home">CC</a>
-        <a href="/view/<%= classInfo.id %>" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Leaderboard" aria-label="Open leaderboard">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3v18h18" /><path d="M7 17l4-8 4 4 5-8" /></svg>
-        </a>
-        <button type="button" id="cc-rail-open-add-students" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Add students" aria-label="Add students">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-        </button>
-        <button type="button" id="cc-rail-open-broadcast" class="cc-teacher-rail-btn inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="Message class" aria-label="Message class">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-        </button>
-        <button type="button" id="cc-rail-open-drawer" class="cc-teacher-rail-btn mt-auto inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition hover:bg-zinc-900 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40" title="More class tools" aria-label="More class tools">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
-    </aside>
+        </div>
+    </section>
 </div>
 
 <div id="class-manage-drawer" class="<%= ccDrawerRoot %>" data-open="false" aria-hidden="true">
@@ -309,8 +245,7 @@
             autocomplete="off"
         >
             <input type="hidden" name="_formNonce" value="<%= bulkFormNonce %>">
-            <div id="cc-pdf-modal-slot" class="mb-3 min-h-0 w-full"></div>
-            <textarea
+<textarea
                 id="bulk-student-list"
                 name="studentList"
                 rows="8"
@@ -423,10 +358,6 @@
 </div>
 
 <script id="class-manage-students-json" type="application/json"><%- JSON.stringify(students.map((s) => ({ id: String(s.id), name: s.name, xp: s.xp }))) %></script>
-<script id="class-manage-pdf-bootstrap" type="application/json"><%- JSON.stringify(typeof pdfSyncBootstrap !== 'undefined' ? pdfSyncBootstrap : {}) %></script>
-<script src="/js/class-theater.js"></script>
-<script src="/js/class-pdf-sync.js"></script>
-
 <script>
 let pendingActions = {};
 var studentNameById = {};
@@ -567,12 +498,7 @@ function clearAllPendingTimers() {
                 textarea.focus();
             }, 0);
         }
-        window.setTimeout(function () {
-            if (window.__ccTeacherPdfCtl && typeof window.__ccTeacherPdfCtl.rerenderModal === 'function') {
-                window.__ccTeacherPdfCtl.rerenderModal();
-            }
-        }, 50);
-    }
+}
 
     function closeModal() {
         if (!modal) return;
@@ -874,22 +800,42 @@ async function giveXP(studentId, xpAmount, classId, studentName) {
 
     var timeoutId = setTimeout(async function () {
         clearInterval(intervalId);
-        statusArea.innerHTML =
-            '<div class="flex items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-950/30 px-3 py-2 text-xs font-medium text-emerald-300">' +
-            '<span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" aria-hidden="true"></span>' +
-            'Saved to leaderboard' +
-            '</div>';
-        if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
-
-        await fetch('/class/award-xp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ studentId, xpAmount: amt, classId, studentName })
-        });
-
-        setTimeout(function () {
-            if (statusArea) statusArea.innerHTML = '';
-        }, 2000);
+        try {
+            var res = await fetch('/class/award-xp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId, xpAmount: amt, classId, studentName })
+            });
+            var data = await res.json().catch(function () {
+                return {};
+            });
+            if (!res.ok || !data.success) {
+                statusArea.innerHTML =
+                    '<div class="rounded-lg border border-red-500/30 bg-red-950/30 px-3 py-2 text-xs font-medium text-red-300">Could not save XP. Try again.</div>';
+                if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+                delete pendingActions[studentId];
+                return;
+            }
+            studentXpById[studentId] = (studentXpById[studentId] || 0) + amt;
+            var xpRow = document.querySelector('.student-xp-row[data-student-id="' + studentId + '"]');
+            if (xpRow) {
+                var badge = xpRow.querySelector('.student-xp-total');
+                if (badge) badge.textContent = studentXpById[studentId] + ' XP';
+            }
+            statusArea.innerHTML =
+                '<div class="flex items-center gap-2 rounded-lg border border-emerald-500/25 bg-emerald-950/30 px-3 py-2 text-xs font-medium text-emerald-300">' +
+                '<span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" aria-hidden="true"></span>' +
+                'Saved to leaderboard' +
+                '</div>';
+            if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+            setTimeout(function () {
+                if (statusArea) statusArea.innerHTML = '';
+            }, 2000);
+        } catch (e) {
+            statusArea.innerHTML =
+                '<div class="rounded-lg border border-red-500/30 bg-red-950/30 px-3 py-2 text-xs font-medium text-red-300">Network error. Try again.</div>';
+            if (typeof ccTailwindRefresh === 'function') ccTailwindRefresh();
+        }
         delete pendingActions[studentId];
     }, 5000);
 
@@ -919,8 +865,25 @@ function applyStudentSearchFilter() {
     });
 }
 
+function updateStudentXpBadge(sid, xpVal) {
+    var row = document.querySelector('.student-xp-row[data-student-id="' + sid + '"]');
+    if (!row) return;
+    var badge = row.querySelector('.student-xp-total');
+    if (badge) badge.textContent = xpVal + ' XP';
+}
+
 function rebuildStudentXpList(students) {
-    clearAllPendingTimers();
+    if (Object.keys(pendingActions).length > 0) {
+        (students || []).forEach(function (s) {
+            var sid = String(s.id);
+            if (pendingActions[sid]) return;
+            studentNameById[sid] = s.name != null ? String(s.name) : '';
+            studentXpById[sid] = s.xp != null ? Number(s.xp) : 0;
+            updateStudentXpBadge(sid, studentXpById[sid]);
+        });
+        applyStudentSearchFilter();
+        return;
+    }
 
     var root = document.getElementById('student-xp-list');
     if (!root) return;
@@ -954,9 +917,9 @@ function rebuildStudentXpList(students) {
     }
 
     var deductCls =
-        'xp-award-btn min-w-[3.25rem] rounded-lg border border-rose-500/25 bg-rose-950/40 px-2 py-2 text-center text-sm font-semibold tabular-nums text-rose-200 shadow-sm transition hover:border-rose-400/40 hover:bg-rose-950/65 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/35 active:scale-[0.97]';
+        'xp-award-btn flex min-h-11 items-center justify-center rounded-lg border px-2 text-center text-sm font-semibold tabular-nums shadow-sm transition active:scale-[0.97] focus:outline-none focus-visible:ring-2 border-rose-500/25 bg-rose-950/40 text-rose-200 hover:border-rose-400/40 hover:bg-rose-950/65 hover:text-rose-100 focus-visible:ring-rose-500/35';
     var addCls =
-        'xp-award-btn min-w-[3.25rem] rounded-lg border border-emerald-500/25 bg-emerald-950/40 px-2 py-2 text-center text-sm font-semibold tabular-nums text-emerald-200 shadow-sm transition hover:border-emerald-400/40 hover:bg-emerald-950/65 hover:text-emerald-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35 active:scale-[0.97]';
+        'xp-award-btn flex min-h-11 items-center justify-center rounded-lg border px-2 text-center text-sm font-semibold tabular-nums shadow-sm transition active:scale-[0.97] focus:outline-none focus-visible:ring-2 border-emerald-500/25 bg-emerald-950/40 text-emerald-200 hover:border-emerald-400/40 hover:bg-emerald-950/65 hover:text-emerald-100 focus-visible:ring-emerald-500/35';
 
     list.forEach(function (student) {
         var sid = String(student.id);
@@ -993,39 +956,15 @@ function rebuildStudentXpList(students) {
         adjustWrap.className = 'mt-3 rounded-xl border border-zinc-800/80 bg-[#0a0a0a] p-2.5';
         adjustWrap.setAttribute('aria-label', 'Adjust experience points');
         var adjustInner = document.createElement('div');
-        adjustInner.className = 'flex flex-row flex-wrap items-stretch gap-2 sm:gap-0';
-
-        var deductCol = document.createElement('div');
-        deductCol.className =
-            'flex min-w-0 flex-1 flex-wrap items-center justify-start gap-1.5 sm:px-1';
-        [-10, -5].forEach(function (points) {
+        adjustInner.className = 'grid grid-cols-4 gap-2';
+        [-10, -5, 5, 10].forEach(function (points) {
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = deductCls;
+            btn.className = points < 0 ? deductCls : addCls;
             btn.setAttribute('data-points', String(points));
-            btn.textContent = String(points);
-            deductCol.appendChild(btn);
+            btn.textContent = points > 0 ? '+' + points : String(points);
+            adjustInner.appendChild(btn);
         });
-
-        var divider = document.createElement('div');
-        divider.className = 'mx-1 w-px shrink-0 self-stretch bg-zinc-800 sm:mx-2';
-        divider.setAttribute('aria-hidden', 'true');
-
-        var addCol = document.createElement('div');
-        addCol.className =
-            'flex min-w-0 flex-1 flex-wrap items-center justify-end gap-1.5 sm:px-1';
-        [5, 10].forEach(function (points) {
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = addCls;
-            btn.setAttribute('data-points', String(points));
-            btn.textContent = '+' + points;
-            addCol.appendChild(btn);
-        });
-
-        adjustInner.appendChild(deductCol);
-        adjustInner.appendChild(divider);
-        adjustInner.appendChild(addCol);
         adjustWrap.appendChild(adjustInner);
 
         var statusSpan = document.createElement('div');
@@ -1061,8 +1000,6 @@ function rebuildStudentXpList(students) {
     var proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     var wsUrl = proto + '//' + window.location.host + '/ws?classId=' + encodeURIComponent(classId);
     var reconnectTimer;
-    var teacherPdfCtl = null;
-
     function connect() {
         var ws;
         try {
@@ -1084,8 +1021,6 @@ function rebuildStudentXpList(students) {
                     rebuildStudentXpList(data.students);
                 } else if (data.type === 'announcement' && typeof data.message === 'string') {
                     showClassLiveAnnouncement(data.message);
-                } else if (data.type === 'pdf_sync' && teacherPdfCtl) {
-                    teacherPdfCtl.onPdfSyncMessage(data);
                 }
             } catch (err) {
                 /* ignore */
@@ -1113,32 +1048,7 @@ function rebuildStudentXpList(students) {
         connect();
     }
 
-    var mainPdf = document.getElementById('cc-teacher-pdf-root');
-    var modalPdf = document.getElementById('cc-pdf-modal-slot');
-    if (typeof ClassPdfSync !== 'undefined' && viewId && mainPdf) {
-        var bootPdf = {};
-        try {
-            var pb = document.getElementById('class-manage-pdf-bootstrap');
-            if (pb && pb.textContent) bootPdf = JSON.parse(pb.textContent);
-        } catch (pe) {
-            bootPdf = {};
-        }
-        ClassPdfSync.initTeacher({
-            classId: classId,
-            viewId: viewId,
-            bootstrap: bootPdf,
-            mainRoot: mainPdf,
-            pdfStage: document.getElementById('cc-teacher-pdf-stage'),
-            modalRoot: modalPdf || null,
-            isTeacher: true
-        }).then(function (ctl) {
-            teacherPdfCtl = ctl;
-            window.__ccTeacherPdfCtl = ctl;
-            startSocket();
-        });
-    } else {
-        startSocket();
-    }
+    startSocket();
 })();
 </script>
 

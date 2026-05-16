@@ -7,8 +7,7 @@
     },
     "scripts": {
         "start": "node server.js",
-        "dev": "nodemon server.js",
-        "postinstall": "node -e \"const fs=require('fs'),path=require('path');const r=process.cwd();const v=path.join(r,'public','vendor');const n=path.join(r,'node_modules','pdfjs-dist','build');try{fs.mkdirSync(v,{recursive:true})}catch(e){};['pdf.worker.min.mjs','pdf.min.mjs'].forEach(f=>{try{const s=path.join(n,f),d=path.join(v,f);if(fs.existsSync(s))fs.copyFileSync(s,d)}catch(e){}});\""
+        "dev": "nodemon server.js"
     },
     "nodemonConfig": {
         "watch": [
@@ -29,8 +28,6 @@
         "ejs": "^3.1.9",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
-        "multer": "^2.1.1",
-        "pdfjs-dist": "^4.10.38",
         "uuid": "^9.0.1",
         "ws": "^8.20.0"
     },

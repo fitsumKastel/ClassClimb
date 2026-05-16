@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 <div class="bg-[#000] text-white min-h-[calc(100svh-4rem)] flex flex-col items-center px-3 py-6 sm:px-4 sm:py-8">
-    <div class="w-full max-w-md lg:w-[30%] lg:min-w-0 my-auto">
+    <div class="w-full max-w-md mx-auto my-auto">
         <div class="bg-[#111] p-4 sm:p-6 rounded-2xl border border-gray-900">
             <form action="/class/create" method="POST" class="space-y-4" autocomplete="off">
                 <input type="hidden" name="_formNonce" value="<%= formNonce %>">

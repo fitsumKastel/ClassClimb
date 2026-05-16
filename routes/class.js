@@ -1,35 +1,14 @@
 const crypto = require('crypto');
-const fs = require('fs');
 const express = require('express');
-const multer = require('multer');
 const router = express.Router();
 const db = require('../lib/db');
 const { requireUser } = require('../middleware/auth');
 const { broadcastXP } = require('../lib/linkbot');
-const {
-    broadcastLeaderboard,
-    broadcastClassAnnouncement,
-    broadcastPdfSync,
-    buildPdfSyncData
-} = require('../lib/realtime');
+const { broadcastLeaderboard, broadcastClassAnnouncement } = require('../lib/realtime');
 const { formatStudentName } = require('../lib/format-student-name');
 const { v4: uuidv4 } = require('uuid');
-const {
-    ensureMaterialsDir,
-    pdfFilePathForClass,
-    classHasPdfFile,
-    deleteClassPdf,
-    looksLikePdf,
-    MAX_CLASS_PDF_BYTES,
-    countPdfPages
-} = require('../lib/class-materials');
 
 router.use(requireUser);
-
-const multerPdf = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: MAX_CLASS_PDF_BYTES }
-});
 
 router.get('/start-teaching', (req, res) => {
     res.redirect(303, '/teacher');
@@ -74,16 +53,16 @@ router.get('/manage/:id', (req, res) => {
                 const bulkFormNonce = crypto.randomBytes(32).toString('hex');
                 req.session.bulkAddNonces[viewId] = bulkFormNonce;
 
-                const pdfSyncBootstrap = buildPdfSyncData(classInfo, classInfo.id);
-
                 res.render('class-manage', {
                     classInfo,
                     students: students || [],
                     bulkFormNonce,
-                    pdfSyncBootstrap,
                     bodyPageClass: 'cc-teacher-console',
                     headerBackHref: '/',
-                    headerBackLabel: 'Back to classes'
+                    headerBackLabel: 'Back to classes',
+                    headerEyebrow: 'Teacher console',
+                    headerTitle: classInfo.class_name,
+                    headerSubtitle: classInfo.school_name || null
                 });
             }
         );
@@ -162,8 +141,6 @@ router.post('/delete', (req, res) => {
         if (req.session.bulkAddNonces && req.session.bulkAddNonces[viewId]) {
             delete req.session.bulkAddNonces[viewId];
         }
-
-        deleteClassPdf(cid);
 
         db.run('DELETE FROM students WHERE class_id = ?', [cid], (e1) => {
             if (e1) {
@@ -332,163 +309,6 @@ router.post('/broadcast-message', (req, res) => {
         }
         res.json({ ok: true });
     });
-});
-
-router.get('/material-pdf/:viewId', (req, res) => {
-    const viewId = typeof req.params.viewId === 'string' ? req.params.viewId.trim() : '';
-    if (!viewId) {
-        res.status(400).end();
-        return;
-    }
-    db.get('SELECT id FROM classes WHERE view_id = ?', [viewId], (err, row) => {
-        if (err || !row) {
-            res.status(404).end();
-            return;
-        }
-        const fp = pdfFilePathForClass(row.id);
-        if (!classHasPdfFile(row.id)) {
-            res.status(404).end();
-            return;
-        }
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
-        res.sendFile(fp, (sendErr) => {
-            if (sendErr && !res.headersSent) {
-                res.status(500).end();
-            }
-        });
-    });
-});
-
-router.post('/material-pdf/:viewId', (req, res, next) => {
-    multerPdf.single('pdf')(req, res, (err) => {
-        if (err) {
-            res.status(400).json({ ok: false, error: 'upload' });
-            return;
-        }
-        next();
-    });
-}, async (req, res) => {
-    const viewId = typeof req.params.viewId === 'string' ? req.params.viewId.trim() : '';
-    if (!viewId || !req.file || !req.file.buffer) {
-        res.status(400).json({ ok: false, error: 'no_file' });
-        return;
-    }
-    if (!looksLikePdf(req.file.buffer)) {
-        res.status(400).json({ ok: false, error: 'not_pdf' });
-        return;
-    }
-
-    db.get('SELECT id, teacher_id, class_pdf_rev FROM classes WHERE view_id = ?', [viewId], async (err, classRow) => {
-        if (err || !classRow) {
-            res.status(404).json({ ok: false, error: 'not_found' });
-            return;
-        }
-        if (!canManageClass(classRow, req.session.user_id)) {
-            res.status(403).json({ ok: false, error: 'forbidden' });
-            return;
-        }
-
-        let numPages;
-        try {
-            numPages = await countPdfPages(req.file.buffer);
-        } catch (e) {
-            res.status(400).json({ ok: false, error: 'bad_pdf' });
-            return;
-        }
-        if (!numPages || numPages < 1) {
-            res.status(400).json({ ok: false, error: 'bad_pdf' });
-            return;
-        }
-
-        const newRev = (Number(classRow.class_pdf_rev) || 0) + 1;
-        ensureMaterialsDir();
-        try {
-            fs.writeFileSync(pdfFilePathForClass(classRow.id), req.file.buffer);
-        } catch (wErr) {
-            res.status(500).json({ ok: false, error: 'write_failed' });
-            return;
-        }
-
-        db.run(
-            'UPDATE classes SET class_pdf_rev = ?, class_pdf_num_pages = ?, pdf_follow_page = 1, pdf_follow_active = 0 WHERE id = ?',
-            [newRev, numPages, classRow.id],
-            (uErr) => {
-                if (uErr) {
-                    res.status(500).json({ ok: false, error: 'db_failed' });
-                    return;
-                }
-                broadcastPdfSync(classRow.id);
-                res.json({ ok: true, rev: newRev, numPages: numPages });
-            }
-        );
-    });
-});
-
-router.post('/pdf-live', (req, res) => {
-    const rawClassId = req.body && req.body.classId;
-    const classId = parseInt(String(rawClassId != null ? rawClassId : ''), 10);
-    if (!Number.isFinite(classId) || classId <= 0) {
-        res.status(400).json({ ok: false, error: 'bad_class' });
-        return;
-    }
-    const body = req.body || {};
-    const live = body.live === true || body.live === 1 || body.live === '1';
-
-    db.get('SELECT teacher_id FROM classes WHERE id = ?', [classId], (permErr, classRow) => {
-        if (permErr || !classRow || !canManageClass(classRow, req.session.user_id)) {
-            res.status(403).json({ ok: false, error: 'forbidden' });
-            return;
-        }
-        if (live && !classHasPdfFile(classId)) {
-            res.status(400).json({ ok: false, error: 'no_pdf' });
-            return;
-        }
-        db.run('UPDATE classes SET pdf_follow_active = ? WHERE id = ?', [live ? 1 : 0, classId], (e2) => {
-            if (e2) {
-                res.status(500).json({ ok: false, error: 'db_failed' });
-                return;
-            }
-            broadcastPdfSync(classId);
-            res.json({ ok: true });
-        });
-    });
-});
-
-router.post('/pdf-page', (req, res) => {
-    const rawClassId = req.body && req.body.classId;
-    const classId = parseInt(String(rawClassId != null ? rawClassId : ''), 10);
-    const pageRaw = req.body && req.body.page;
-    const page = parseInt(String(pageRaw != null ? pageRaw : ''), 10);
-    if (!Number.isFinite(classId) || classId <= 0 || !Number.isFinite(page) || page < 1) {
-        res.status(400).json({ ok: false, error: 'bad_request' });
-        return;
-    }
-
-    db.get(
-        'SELECT teacher_id, class_pdf_num_pages FROM classes WHERE id = ?',
-        [classId],
-        (permErr, classRow) => {
-            if (permErr || !classRow || !canManageClass(classRow, req.session.user_id)) {
-                res.status(403).json({ ok: false, error: 'forbidden' });
-                return;
-            }
-            const maxP = Math.max(1, Number(classRow.class_pdf_num_pages) || 0);
-            if (!classHasPdfFile(classId) || maxP < 1) {
-                res.status(400).json({ ok: false, error: 'no_pdf' });
-                return;
-            }
-            const clamped = Math.min(Math.max(page, 1), maxP);
-            db.run('UPDATE classes SET pdf_follow_page = ? WHERE id = ?', [clamped, classId], (e2) => {
-                if (e2) {
-                    res.status(500).json({ ok: false, error: 'db_failed' });
-                    return;
-                }
-                broadcastPdfSync(classId);
-                res.json({ ok: true, page: clamped });
-            });
-        }
-    );
 });
 
 router.post('/student/edit', (req, res) => {
