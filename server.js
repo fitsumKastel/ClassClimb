@@ -125,7 +125,7 @@ app.use(appUpdateModeMiddleware);
 app.use('/auth', authRoutes);
 app.use('/class', classRoutes);
 
-// Legacy URL — same teacher home as / (create class + class list).
+// Teacher entry URL → home dashboard (create class + class list).
 app.get('/teacher', requireUser, (req, res) => {
     res.redirect(303, '/');
 });

@@ -11,10 +11,6 @@ const { v4: uuidv4 } = require('uuid');
 
 router.use(requireUser);
 
-router.get('/start-teaching', (req, res) => {
-    res.redirect(303, '/');
-});
-
 function canManageClass(classInfo, userId) {
     if (!classInfo || !userId) {
         return false;
