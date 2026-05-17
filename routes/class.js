@@ -54,7 +54,6 @@ router.get('/manage/:id', (req, res) => {
                     classInfo,
                     students: students || [],
                     bulkFormNonce,
-                    bodyPageClass: 'cc-teacher-console',
                     headerBackHref: '/',
                     headerBackLabel: 'Back to classes',
                     headerEyebrow: 'Teacher console',

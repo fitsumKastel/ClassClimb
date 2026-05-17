@@ -1,11 +1,10 @@
 <%- include('partials/header') %>
-<div id="cc-teacher-layout" class="mx-auto w-full max-w-2xl bg-[#000] px-4 pb-10 pt-2 text-white">
+<div id="cc-manage-page" class="mx-auto flex w-full min-h-[calc(100dvh-4rem)] max-w-lg flex-col bg-[#000] px-4 pb-10 pt-2 text-white">
     <section aria-labelledby="student-list-heading">
         <h2 id="student-list-heading" class="sr-only">Students and experience points</h2>
 
         <div class="sticky top-0 z-20 -mx-4 border-b border-zinc-800/80 bg-pure-black/95 px-4 pb-3 pt-1 backdrop-blur-sm">
             <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Students</p>
-            <div class="cc-teacher-side-top">
                 <input
                     type="text"
                     id="student-search"
@@ -33,11 +32,10 @@
                     </button>
                 </div>
                 </div>
-            </div>
         </div>
 
         <p class="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Award XP</p>
-        <div id="student-xp-list" class="cc-teacher-side-students mt-2 space-y-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
+        <div id="student-xp-list" class="mt-2 space-y-3" data-class-id="<%= classInfo.id %>" data-view-id="<%= classInfo.view_id %>">
                 <% if (students.length === 0) { %>
                     <p class="rounded-xl border border-zinc-800 bg-[#111] px-3 py-6 text-center text-sm text-zinc-500 sm:px-4 sm:py-8">
                         No students yet.
@@ -96,11 +94,11 @@
                                         </button>
                                     <% }) %>
                                 </div>
+                            </div>
 
                         <div id="status-<%= student.id %>" class="mt-2 min-h-0"></div>
                     </div>
                 <% }) %>
-        </div>
         </div>
     </section>
 </div>
