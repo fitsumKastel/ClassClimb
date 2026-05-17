@@ -12,77 +12,19 @@
 </div>
 
 <script src="/js/uppercase-input.js" defer></script>
+<script src="/js/create-class-form.js"></script>
 <script>
 (function () {
     var form = document.getElementById('create-class-form');
-    var errEl = document.getElementById('create-class-error');
-    var submitBtn = document.getElementById('create-class-submit');
-    if (!form) return;
-
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (errEl) {
-            errEl.textContent = '';
-            errEl.classList.add('hidden');
+    if (!form || typeof window.classclimbBindCreateClassForm !== 'function') {
+        return;
+    }
+    window.classclimbBindCreateClassForm(form, {
+        onSuccess: function (data) {
+            if (data.class && data.class.view_id) {
+                window.location.href = '/class/manage/' + data.class.view_id;
+            }
         }
-        var prevText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating…';
-        }
-
-        var fd = new FormData(form);
-        var body = new URLSearchParams(fd);
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body: body.toString(),
-            credentials: 'same-origin'
-        })
-            .then(function (res) {
-                var ct = res.headers.get('content-type') || '';
-                if (ct.includes('application/json')) {
-                    return res.json().then(function (data) {
-                        return { ok: res.ok, data: data };
-                    });
-                }
-                return { ok: false, data: null };
-            })
-            .then(function (result) {
-                if (result.ok && result.data && result.data.ok && result.data.class && result.data.class.view_id) {
-                    window.location.href = '/class/manage/' + result.data.class.view_id;
-                    return;
-                }
-                var msg = 'Could not create class. Please try again.';
-                if (result.data && result.data.error === 'invalid_nonce') {
-                    msg = 'This page is out of date. Refresh and try again.';
-                } else if (result.data && result.data.error === 'missing_fields') {
-                    msg = 'Enter both a class name and a school name.';
-                }
-                if (errEl) {
-                    errEl.textContent = msg;
-                    errEl.classList.remove('hidden');
-                }
-                var nonceInput = form.querySelector('[name=_formNonce]');
-                if (nonceInput && result.data && result.data.formNonce) {
-                    nonceInput.value = result.data.formNonce;
-                }
-            })
-            .catch(function () {
-                if (errEl) {
-                    errEl.textContent = 'Network error. Check your connection and try again.';
-                    errEl.classList.remove('hidden');
-                }
-            })
-            .finally(function () {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = prevText || 'Create class';
-                }
-            });
     });
 })();
 </script>

@@ -88,6 +88,21 @@ router.get('/manage/:id', (req, res) => {
     });
 });
 
+function mintCreateClassNonce(req) {
+    const formNonce = crypto.randomBytes(32).toString('hex');
+    req.session.createClassNonce = formNonce;
+    return formNonce;
+}
+
+function sendCreateJson(req, res, status, body) {
+    req.session.save((saveErr) => {
+        if (saveErr) {
+            console.error('POST /class/create: session save failed:', saveErr.message || saveErr);
+        }
+        res.status(status).json(body);
+    });
+}
+
 // Create a new class
 router.post('/create', (req, res) => {
     const wantsJson = Boolean(req.get('Accept') && req.get('Accept').includes('application/json'));
@@ -95,8 +110,9 @@ router.post('/create', (req, res) => {
     const expectedNonce = req.session.createClassNonce;
 
     if (!submittedNonce || !expectedNonce || submittedNonce !== expectedNonce) {
+        const freshNonce = mintCreateClassNonce(req);
         if (wantsJson) {
-            res.status(400).json({ ok: false, error: 'invalid_nonce' });
+            sendCreateJson(req, res, 400, { ok: false, error: 'invalid_nonce', formNonce: freshNonce });
             return;
         }
         res.redirect(303, '/teacher');
@@ -109,7 +125,7 @@ router.post('/create', (req, res) => {
 
     if (!teacherId) {
         if (wantsJson) {
-            res.status(401).json({ ok: false, error: 'not_signed_in' });
+            sendCreateJson(req, res, 401, { ok: false, error: 'not_signed_in' });
             return;
         }
         res.redirect(303, '/auth/login?return=' + encodeURIComponent('/teacher'));
@@ -118,7 +134,7 @@ router.post('/create', (req, res) => {
 
     if (!className || !schoolName) {
         if (wantsJson) {
-            res.status(400).json({ ok: false, error: 'missing_fields' });
+            sendCreateJson(req, res, 400, { ok: false, error: 'missing_fields' });
             return;
         }
         res.redirect(303, '/teacher?error=' + encodeURIComponent('Class name and school are required.'));
@@ -130,31 +146,40 @@ router.post('/create', (req, res) => {
     insertClassRecord(teacherId, className, schoolName, viewId, 0, function (err, insertedViewId) {
         if (err) {
             console.error('POST /class/create:', err.message || err);
+            const code =
+                /EACCES|EPERM|EROFS|ENOSPC/i.test(String(err.message || err)) ?
+                    'storage_failed'
+                :   'create_failed';
             if (wantsJson) {
-                res.status(500).json({ ok: false, error: 'create_failed' });
+                sendCreateJson(req, res, 500, { ok: false, error: code });
                 return;
             }
             res.status(500).send('Error creating class.');
             return;
         }
 
+        const classId = this.lastID;
         delete req.session.createClassNonce;
 
         const newClass = {
-            id: this.lastID,
+            id: classId,
             view_id: insertedViewId,
             class_name: className,
             school_name: schoolName
         };
 
         if (wantsJson) {
-            const formNonce = crypto.randomBytes(32).toString('hex');
-            req.session.createClassNonce = formNonce;
-            res.json({ ok: true, class: newClass, formNonce });
+            const formNonce = mintCreateClassNonce(req);
+            sendCreateJson(req, res, 200, { ok: true, class: newClass, formNonce });
             return;
         }
 
-        res.redirect(303, `/class/manage/${insertedViewId}`);
+        req.session.save((saveErr) => {
+            if (saveErr) {
+                console.error('POST /class/create: session save failed:', saveErr.message || saveErr);
+            }
+            res.redirect(303, `/class/manage/${insertedViewId}`);
+        });
     });
 });
 

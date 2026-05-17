@@ -1,29 +1,6 @@
 const { loadEnvFromRoot } = require('./lib/load-env');
 loadEnvFromRoot();
 
-function assertNodeRuntime() {
-    const m = process.version.match(/^v(\d+)\.(\d+)/);
-    const major = m ? parseInt(m[1], 10) : 0;
-    const minor = m ? parseInt(m[2], 10) : 0;
-    if (major < 22 || (major === 22 && minor < 5)) {
-        console.error(
-            `ClassClimb needs Node.js 22.5+ (uses node:sqlite). Current: ${process.version}. ` +
-                'In cPanel → Setup Node.js, select Node 22 and Restart.'
-        );
-        process.exit(1);
-    }
-    try {
-        require('node:sqlite');
-    } catch (err) {
-        console.error(
-            'ClassClimb could not load node:sqlite:',
-            err && err.message ? err.message : err
-        );
-        process.exit(1);
-    }
-}
-assertNodeRuntime();
-
 try {
     require('./lib/storage-paths').initStorage();
 } catch (err) {
@@ -74,8 +51,7 @@ const http = require('http');
 const express = require('express');
 const { initRealtime } = require('./lib/realtime');
 const session = require('express-session');
-const SqliteSessionStore = require('./lib/sqlite-session-store');
-const { getSessionsDir } = require('./lib/storage-paths');
+const { createSessionStore } = require('./lib/create-session-store');
 const db = require('./lib/db');
 const { telegramAppStartUrl, seedLinkbotSiteSecretFromEnv } = require('./lib/linkbot');
 const { requireUser, safeReturnPath } = require('./middleware/auth');
@@ -84,6 +60,14 @@ const classRoutes = require('./routes/class');
 const { appUpdateModeMiddleware, isAppUpdateMode } = require('./lib/app-update-mode');
 
 const app = express();
+
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        ok: true,
+        node: process.version,
+        updateMode: isAppUpdateMode()
+    });
+});
 
 // Behind LiteSpeed/nginx HTTPS termination Node often sees HTTP; trust proxy unless disabled.
 if (process.env.TRUST_PROXY !== '0') {
@@ -104,11 +88,7 @@ const cookieSameSite =
     sameSiteRaw === 'none' || sameSiteRaw === 'strict' || sameSiteRaw === 'lax' ? sameSiteRaw : 'lax';
 const cookieSecureEffective = cookieSameSite === 'none' ? true : cookieSecure;
 
-const sessionStore = new SqliteSessionStore({
-    db: 'sessions.db',
-    dir: getSessionsDir(),
-    concurrentDB: true
-});
+const sessionStore = createSessionStore();
 
 const sessionSecret = process.env.SESSION_SECRET || 'class-climb-2026';
 
@@ -530,15 +510,22 @@ initRealtime(httpServer, sessionStore, {
     secret: sessionSecret
 });
 
+function onServerListening() {
+    const via = typeof PhusionPassenger !== 'undefined' ? 'Passenger' : `port ${PORT}`;
+    console.log(`ClassClimb is listening (${via}, Node ${process.version})`);
+    if (isAppUpdateMode()) {
+        console.log('APP_UPDATE_MODE is on — visitors see the update page (set APP_UPDATE_MODE=0 when done).');
+    }
+}
+
 (async () => {
     try {
         await seedLinkbotSiteSecretFromEnv();
-        httpServer.listen(PORT, '0.0.0.0', () => {
-            console.log(`ClassClimb is listening on port ${PORT}`);
-            if (isAppUpdateMode()) {
-                console.log('APP_UPDATE_MODE is on — visitors see the update page (set APP_UPDATE_MODE=0 when done).');
-            }
-        });
+        if (typeof PhusionPassenger !== 'undefined') {
+            httpServer.listen('passenger', onServerListening);
+        } else {
+            httpServer.listen(PORT, '0.0.0.0', onServerListening);
+        }
     } catch (err) {
         console.error('ClassClimb startup failed:', err && err.message ? err.message : err);
         process.exit(1);

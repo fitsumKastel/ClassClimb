@@ -337,6 +337,7 @@
 <% if (typeof signedIn !== 'undefined' && signedIn && typeof isTeacher !== 'undefined' && isTeacher) { %>
 <% if (typeof showCreateClass !== 'undefined' && showCreateClass) { %>
 <script src="/js/uppercase-input.js" defer></script>
+<script src="/js/create-class-form.js"></script>
 <% } %>
 <script>try { sessionStorage.removeItem('classclimb_tg_opened'); } catch (e) {}</script>
 <script>
@@ -542,80 +543,25 @@ function appendClassCard(c) {
     });
 
     var form = document.getElementById('create-class-form');
-    var errEl = document.getElementById('create-class-error');
-    var submitBtn = document.getElementById('create-class-submit');
     var teacherPageBase = '<%= typeof pageBase !== "undefined" && pageBase ? pageBase : "/teacher" %>';
 
-    if (!form) return;
-
-    form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (errEl) {
-            errEl.textContent = '';
-            errEl.classList.add('hidden');
-        }
-
-        var prevText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating…';
-        }
-
-        try {
-            var fd = new FormData(form);
-            var body = new URLSearchParams(fd);
-            var res = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                },
-                body: body.toString(),
-                credentials: 'same-origin'
-            });
-            var data = null;
-            var ct = res.headers.get('content-type') || '';
-            if (ct.includes('application/json')) {
-                data = await res.json();
-            }
-
-            if (!res.ok || !data || !data.ok) {
-                var msg = 'Could not create class. Please try again.';
-                if (data && data.error === 'invalid_nonce') {
-                    msg = 'This page is out of date. Refresh and try again.';
-                } else if (data && data.error === 'missing_fields') {
-                    msg = 'Enter both a class name and a school name.';
+    if (form && typeof window.classclimbBindCreateClassForm === 'function') {
+        window.classclimbBindCreateClassForm(form, {
+            onSuccess: function (data) {
+                var listSection = document.getElementById('class-list-section');
+                var curPage = listSection ? parseInt(listSection.getAttribute('data-page') || '1', 10) : 1;
+                if (curPage !== 1) {
+                    window.location.href =
+                        teacherPageBase + (teacherPageBase.indexOf('?') >= 0 ? '&' : '?') + 'page=1';
+                    return;
                 }
-                if (errEl) {
-                    errEl.textContent = msg;
-                    errEl.classList.remove('hidden');
+                form.reset();
+                if (data.class) {
+                    appendClassCard(data.class);
                 }
-                return;
             }
-
-            var listSection = document.getElementById('class-list-section');
-            var curPage = listSection ? parseInt(listSection.getAttribute('data-page') || '1', 10) : 1;
-            if (curPage !== 1) {
-                window.location.href = teacherPageBase + (teacherPageBase.indexOf('?') >= 0 ? '&' : '?') + 'page=1';
-                return;
-            }
-
-            form.reset();
-            var nonceInput = form.querySelector('[name=_formNonce]');
-            if (nonceInput && data.formNonce) nonceInput.value = data.formNonce;
-            if (data.class) appendClassCard(data.class);
-        } catch (err) {
-            if (errEl) {
-                errEl.textContent = 'Network error. Check your connection and try again.';
-                errEl.classList.remove('hidden');
-            }
-        } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = prevText;
-            }
-        }
-    });
+        });
+    }
 })();
 </script>
 <% } %>
