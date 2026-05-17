@@ -146,10 +146,7 @@ router.post('/complete', async (req, res) => {
         }
 
         function finishRedirectHome() {
-            db.get('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?', [telegramId], (cErr, cRow) => {
-                const owned = !cErr && cRow && Number(cRow.n) > 0;
-                finishRedirect(owned ? '/' : '/teacher');
-            });
+            finishRedirect('/');
         }
 
         if (rawClass) {

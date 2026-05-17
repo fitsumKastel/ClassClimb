@@ -22,10 +22,6 @@ function canManageClass(classInfo, userId) {
     return owner === String(userId);
 }
 
-function trimBodyField(value) {
-    return typeof value === 'string' ? value.trim() : '';
-}
-
 function newClassViewId() {
     return uuidv4().replace(/-/g, '').slice(0, 12);
 }
@@ -37,10 +33,7 @@ function isViewIdUniqueError(err) {
     return /UNIQUE constraint failed:.*view_id/i.test(String(err.message));
 }
 
-const INSERT_CLASS_SQL = `INSERT INTO classes (
-    teacher_id, class_name, school_name, view_id,
-    class_pdf_rev, pdf_follow_active, pdf_follow_page
-) VALUES (?, ?, ?, ?, 0, 0, 1)`;
+const INSERT_CLASS_SQL = `INSERT INTO classes (teacher_id, class_name, school_name, view_id) VALUES (?, ?, ?, ?)`;
 
 function insertClassRecord(teacherId, className, schoolName, viewId, attempt, callback) {
     db.run(INSERT_CLASS_SQL, [teacherId, className, schoolName, viewId], function (err) {
@@ -62,7 +55,7 @@ router.get('/manage/:id', (req, res) => {
         }
 
         if (!canManageClass(classInfo, req.session.user_id)) {
-            return res.redirect('/?error=' + encodeURIComponent('You do not have access to manage this class'));
+            return res.redirect(303, `/view/${classInfo.id}`);
         }
 
         db.all(
@@ -84,7 +77,7 @@ router.get('/manage/:id', (req, res) => {
                     classInfo,
                     students: students || [],
                     bulkFormNonce,
-                    headerBackHref: '/',
+                    headerBackHref: '/teacher',
                     headerBackLabel: 'Back to classes',
                     headerEyebrow: 'Teacher console',
                     headerTitle: classInfo.class_name,
@@ -106,29 +99,14 @@ router.post('/create', (req, res) => {
             res.status(400).json({ ok: false, error: 'invalid_nonce' });
             return;
         }
-        res.redirect(303, '/');
+        res.redirect(303, '/teacher');
         return;
     }
 
-    const className = trimBodyField(req.body.className);
-    const schoolName = trimBodyField(req.body.schoolName);
-    const teacherId = String(req.session.user_id || '').trim();
-
-<<<<<<< Updated upstream
     const className = formatClassLabel(typeof req.body.className === 'string' ? req.body.className : '');
     const schoolName = formatClassLabel(typeof req.body.schoolName === 'string' ? req.body.schoolName : '');
-    if (!className || !schoolName) {
-        if (wantsJson) {
-            res.status(400).json({ ok: false, error: 'name_required' });
-            return;
-        }
-        res.redirect(303, '/');
-        return;
-    }
+    const teacherId = String(req.session.user_id || '').trim();
 
-    const teacherId = req.session.user_id;
-    const viewId = uuidv4().substring(0, 8); // Short unique ID for the URL
-=======
     if (!teacherId) {
         if (wantsJson) {
             res.status(401).json({ ok: false, error: 'not_signed_in' });
@@ -137,7 +115,6 @@ router.post('/create', (req, res) => {
         res.redirect(303, '/auth/login?return=' + encodeURIComponent('/teacher'));
         return;
     }
->>>>>>> Stashed changes
 
     if (!className || !schoolName) {
         if (wantsJson) {

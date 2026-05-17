@@ -3,6 +3,7 @@
 <% var onManage = typeof currentPath === 'string' && currentPath.indexOf('/class/manage/') === 0; %>
 <% var showLeaderboardMenu = studentNav && signedIn; %>
 <% var showClassToolsMenu = onManage; %>
+<% var onTeacher = typeof currentPath === 'string' && currentPath === '/teacher'; %>
 <% var showAccountDrawer = signedIn && !showLeaderboardMenu && !onManage; %>
 <% var navBackHref = locals.headerBackHref || null; %>
 <% var navBackLabel = locals.headerBackLabel || 'Back'; %>
@@ -206,6 +207,46 @@
             <nav class="flex w-full flex-col items-stretch space-y-8 text-left" aria-label="Account menu">
                 <section>
                     <h3 class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Account</h3>
+                    <ul class="m-0 w-full list-none space-y-1.5 p-0">
+                        <% if (!onTeacher) { %>
+                        <li class="w-full">
+                            <a href="/teacher" class="<%= ccDrawerNavItem %>">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 shrink-0 opacity-90"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                                <span>Teacher area</span>
+                            </a>
+                        </li>
+                        <% } else { %>
+                        <li class="w-full">
+                            <a href="/" class="<%= ccDrawerNavItem %>">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 shrink-0 opacity-90"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                    <polyline points="9 22 9 12 15 12 15 22" />
+                                </svg>
+                                <span>Your boards</span>
+                            </a>
+                        </li>
+                        <% } %>
+                    </ul>
+                </section>
+                <section class="border-t border-zinc-800 pt-6">
                     <button type="button" id="app-menu-drawer-logout" class="<%= ccDrawerNavItem %>">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

@@ -128,28 +128,35 @@ app.use('/class', classRoutes);
 function renderStudentHome(req, res, { error }) {
     const userId = String(req.session.user_id);
     delete req.session.createClassNonce;
-    db.all(
-        `SELECT DISTINCT c.id, c.view_id, c.class_name, c.school_name
-         FROM subscriptions s
-         INNER JOIN classes c ON c.id = s.class_id
-         WHERE s.telegram_id = ?
-         ORDER BY c.class_name COLLATE NOCASE ASC, c.id ASC`,
-        [userId],
-        (subErr, boards) => {
-            if (subErr) {
-                res.status(500).send('Failed to load your boards.');
-                return;
+
+    db.get('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?', [userId], (ownErr, ownRow) => {
+        const ownedCount = !ownErr && ownRow && ownRow.n != null ? Number(ownRow.n) : 0;
+
+        db.all(
+            `SELECT DISTINCT c.id, c.view_id, c.class_name, c.school_name
+             FROM subscriptions s
+             INNER JOIN classes c ON c.id = s.class_id
+             WHERE s.telegram_id = ?
+             ORDER BY c.class_name COLLATE NOCASE ASC, c.id ASC`,
+            [userId],
+            (subErr, boards) => {
+                if (subErr) {
+                    res.status(500).send('Failed to load your boards.');
+                    return;
+                }
+                res.render('index', {
+                    signedIn: true,
+                    isTeacher: false,
+                    ownsClasses: ownedCount > 0,
+                    ownedClassCount: ownedCount,
+                    studentBoards: boards || [],
+                    classes: [],
+                    error: error || null,
+                    pageBase: '/'
+                });
             }
-            res.render('index', {
-                signedIn: true,
-                isTeacher: false,
-                studentBoards: boards || [],
-                classes: [],
-                error: error || null,
-                pageBase: '/'
-            });
-        }
-    );
+        );
+    });
 }
 
 function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, showCreateClass }) {
@@ -206,51 +213,11 @@ function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, show
 }
 
 function renderSignedInHome(req, res, error) {
-    const teacherId = String(req.session.user_id);
-
-    db.get(
-        'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
-        [teacherId],
-        (countErr, countRow) => {
-            if (countErr) {
-                res.status(500).send('Failed to load classes.');
-                return;
-            }
-            const ownedCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
-            if (ownedCount > 0) {
-                renderTeacherDashboard(req, res, {
-                    error,
-                    pageBase: '/',
-                    pageRequested: req.query.page
-                });
-                return;
-            }
-            db.get(
-                'SELECT COUNT(*) AS n FROM subscriptions WHERE telegram_id = ?',
-                [teacherId],
-                (subErr, subRow) => {
-                    if (subErr) {
-                        res.status(500).send('Failed to load account.');
-                        return;
-                    }
-                    const subCount = subRow && subRow.n != null ? Number(subRow.n) : 0;
-                    if (subCount > 0) {
-                        renderStudentHome(req, res, { error });
-                        return;
-                    }
-                    renderTeacherDashboard(req, res, {
-                        error,
-                        pageBase: '/',
-                        pageRequested: req.query.page
-                    });
-                }
-            );
-        }
-<<<<<<< Updated upstream
-    );
+    // Home is always the student view (boards). Teacher tools live on /teacher only.
+    renderStudentHome(req, res, { error });
 }
 
-// Teacher URL: full teacher tools only after creating a class; otherwise student boards / empty state.
+// Create-class flow and teacher tools live here only (not on /).
 app.get('/teacher', requireUser, (req, res) => {
     const error = typeof req.query.error === 'string' ? req.query.error : null;
     const teacherId = String(req.session.user_id);
@@ -268,31 +235,28 @@ app.get('/teacher', requireUser, (req, res) => {
                 renderTeacherDashboard(req, res, {
                     error,
                     pageBase: '/teacher',
-                    pageRequested: req.query.page
+                    pageRequested: req.query.page,
+                    showCreateClass: true
                 });
                 return;
             }
-            renderStudentHome(req, res, { error });
+            const formNonce = crypto.randomBytes(32).toString('hex');
+            req.session.createClassNonce = formNonce;
+            const setupError = typeof req.query.error === 'string' ? req.query.error.trim() : '';
+            res.render('start-teaching', {
+                formNonce,
+                setupError: setupError || null,
+                headerBackHref: '/',
+                headerBackLabel: 'Back to home',
+                headerEyebrow: 'Get started',
+                headerTitle: 'Create your class',
+                headerSubtitle: 'Set up a class to get a share link for students.'
+            });
         }
     );
-=======
-        const formNonce = crypto.randomBytes(32).toString('hex');
-        req.session.createClassNonce = formNonce;
-        const setupError = typeof req.query.error === 'string' ? req.query.error.trim() : '';
-        res.render('start-teaching', {
-            formNonce,
-            setupError: setupError || null,
-            headerBackHref: '/',
-            headerBackLabel: 'Back to home',
-            headerEyebrow: 'Get started',
-            headerTitle: 'Create your class',
-            headerSubtitle: 'Set up a class to get a share link for students.'
-        });
-    });
->>>>>>> Stashed changes
 });
 
-// Home: guest landing vs signed-in teacher dashboard
+// Home: guest landing or signed-in student boards (teacher tools on /teacher only)
 app.get('/', (req, res) => {
     const error = typeof req.query.error === 'string' ? req.query.error : null;
 
@@ -323,116 +287,6 @@ app.get('/', (req, res) => {
     const rawSubscribeClass = typeof req.query.class_id === 'string' ? req.query.class_id.trim() : '';
     const subscribeReturn = safeReturnPath(req.query.return);
 
-<<<<<<< Updated upstream
-=======
-    function renderStudentHome(teacherId) {
-        delete req.session.createClassNonce;
-        db.all(
-            `SELECT DISTINCT c.id, c.view_id, c.class_name, c.school_name
-             FROM subscriptions s
-             INNER JOIN classes c ON c.id = s.class_id
-             WHERE s.telegram_id = ?
-             ORDER BY c.class_name COLLATE NOCASE ASC, c.id ASC`,
-            [teacherId],
-            (subErr, boards) => {
-                if (subErr) {
-                    res.status(500).send('Failed to load your boards.');
-                    return;
-                }
-                res.render('index', {
-                    signedIn: true,
-                    isTeacher: false,
-                    studentBoards: boards || [],
-                    classes: [],
-                    error
-                });
-            }
-        );
-    }
-
-    function renderTeacherDashboard(teacherId) {
-        const formNonce = crypto.randomBytes(32).toString('hex');
-        req.session.createClassNonce = formNonce;
-
-        const classesPageSize = Math.max(1, parseInt(process.env.CLASSES_PAGE_SIZE || '10', 10) || 10);
-        const pageRequested = Math.max(1, parseInt(req.query.page, 10) || 1);
-
-        db.get(
-            'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
-            [teacherId],
-            (countErr, countRow) => {
-                if (countErr) {
-                    res.status(500).send('Failed to load classes.');
-                    return;
-                }
-                const totalCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
-                const totalPages = Math.max(1, Math.ceil(totalCount / classesPageSize));
-                const page = Math.min(pageRequested, totalPages);
-                const offset = (page - 1) * classesPageSize;
-
-                db.all(
-                    'SELECT * FROM classes WHERE teacher_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
-                    [teacherId, classesPageSize, offset],
-                    (err, classes) => {
-                        if (err) {
-                            res.status(500).send('Failed to load classes.');
-                            return;
-                        }
-                        res.render('index', {
-                            signedIn: true,
-                            isTeacher: true,
-                            classes: classes || [],
-                            classesPage: page,
-                            classesTotalPages: totalPages,
-                            classesTotalCount: totalCount,
-                            classesPageSize,
-                            formNonce,
-                            error
-                        });
-                    }
-                );
-            }
-        );
-    }
-
-    function renderSignedInDashboard() {
-        const teacherId = String(req.session.user_id);
-
-        db.get(
-            'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
-            [teacherId],
-            (countErr, countRow) => {
-                if (countErr) {
-                    res.status(500).send('Failed to load classes.');
-                    return;
-                }
-                const ownedCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
-                if (ownedCount === 0) {
-                    db.get(
-                        'SELECT COUNT(*) AS n FROM subscriptions WHERE telegram_id = ?',
-                        [teacherId],
-                        (subCountErr, subCountRow) => {
-                            if (subCountErr) {
-                                res.status(500).send('Failed to load your account.');
-                                return;
-                            }
-                            const subCount =
-                                subCountRow && subCountRow.n != null ? Number(subCountRow.n) : 0;
-                            if (subCount === 0) {
-                                res.redirect(303, '/teacher');
-                                return;
-                            }
-                            renderStudentHome(teacherId);
-                        }
-                    );
-                    return;
-                }
-                renderTeacherDashboard(teacherId);
-            }
-        );
-    }
-
->>>>>>> Stashed changes
     if (subscribeLinkId && rawSubscribeClass && subscribeReturn) {
         const lookupCb =
             /^\d+$/.test(rawSubscribeClass) ?
@@ -557,15 +411,22 @@ app.post('/status/logout', (req, res) => {
 
 // Leaderboard (requires sign-in — students and teachers)
 app.get('/view/:classId', requireUser, (req, res) => {
-    const classId = req.params.classId;
+    const rawClassId = String(req.params.classId || '').trim();
 
-    db.get(
-        'SELECT * FROM classes WHERE id = ?',
-        [classId],
-        (classErr, classRow) => {
+    function loadClassRow(cb) {
+        if (/^\d+$/.test(rawClassId)) {
+            db.get('SELECT * FROM classes WHERE id = ?', [parseInt(rawClassId, 10)], cb);
+            return;
+        }
+        db.get('SELECT * FROM classes WHERE view_id = ?', [rawClassId], cb);
+    }
+
+    loadClassRow((classErr, classRow) => {
         if (classErr || !classRow) {
             return res.redirect('/?error=' + encodeURIComponent('Class not found'));
         }
+
+        const classId = String(classRow.id);
 
         const cn = typeof classRow.class_name === 'string' ? classRow.class_name.trim() : '';
         const sn = typeof classRow.school_name === 'string' ? classRow.school_name.trim() : '';
@@ -574,7 +435,8 @@ app.get('/view/:classId', requireUser, (req, res) => {
 
         const viewerId = req.session.user_id != null ? String(req.session.user_id) : '';
         const ownerId = classRow.teacher_id != null ? String(classRow.teacher_id) : '';
-        const isClassTeacher = Boolean(ownerId && viewerId === ownerId);
+        // Per-class: owner of this class only — owning other classes does not change student view here.
+        const isClassTeacher = Boolean(ownerId && viewerId && viewerId === ownerId);
 
         const backHref = isClassTeacher ? `/class/manage/${classRow.view_id}` : '/';
         const backLabel = isClassTeacher ? 'Back to manage' : 'Back to home';
@@ -608,27 +470,39 @@ app.get('/view/:classId', requireUser, (req, res) => {
                 const linkId = req.session.linkbot_link_id || null;
                 const telegramId = req.session.user_id != null ? String(req.session.user_id) : '';
 
-                if (linkId && telegramId) {
+                function checkSubscribedThenFinish() {
+                    db.get(
+                        'SELECT 1 AS ok FROM subscriptions WHERE class_id = ? AND telegram_id = ?',
+                        [classId, telegramId],
+                        (subErr, sub) => {
+                            finishStudentView(Boolean(sub && sub.ok));
+                        }
+                    );
+                }
+
+                function finishStudentView(hasAlerts) {
+                    renderLeaderboardView(hasAlerts);
+                }
+
+                function ensureSubscribedThenRender() {
+                    if (!telegramId) {
+                        finishStudentView(false);
+                        return;
+                    }
+                    if (!linkId) {
+                        checkSubscribedThenFinish();
+                        return;
+                    }
                     db.run(
                         'INSERT OR IGNORE INTO subscriptions (link_id, telegram_id, class_id) VALUES (?, ?, ?)',
                         [linkId, telegramId, classId],
-                        (insErr) => {
-                            if (insErr) {
-                                db.get(
-                                    'SELECT 1 AS ok FROM subscriptions WHERE class_id = ? AND link_id = ?',
-                                    [classId, linkId],
-                                    (subErr, sub) => {
-                                        renderLeaderboardView(Boolean(sub && sub.ok));
-                                    }
-                                );
-                                return;
-                            }
-                            renderLeaderboardView(true);
+                        () => {
+                            checkSubscribedThenFinish();
                         }
                     );
-                } else {
-                    renderLeaderboardView(false);
                 }
+
+                ensureSubscribedThenRender();
             }
         );
     });

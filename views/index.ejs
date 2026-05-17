@@ -107,8 +107,10 @@
             </div>
         <% } else if (typeof isTeacher !== 'undefined' && isTeacher) { %>
         <% var pageBase = typeof pageBase !== 'undefined' && pageBase ? pageBase : '/'; %>
+        <% var showCreate = typeof showCreateClass !== 'undefined' && showCreateClass; %>
 
-        <!-- Teacher: create class -->
+        <% if (showCreate) { %>
+        <!-- Teacher: create class (only on /teacher) -->
         <section
             class="relative mb-6 overflow-hidden rounded-2xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/50 to-[#0a0a0a] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
             aria-labelledby="teacher-create-heading"
@@ -173,6 +175,7 @@
                 </form>
             </div>
         </section>
+        <% } %>
 
         <!-- Teacher: class list -->
         <section
@@ -183,10 +186,13 @@
             data-page-size="<%= typeof classesPageSize !== 'undefined' ? classesPageSize : 10 %>"
             aria-labelledby="your-classes-heading"
         >
-            <div class="mb-3 flex flex-wrap items-center gap-3">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <h2 id="your-classes-heading" class="text-base font-semibold tracking-tight text-white">Your classes</h2>
                 <% if (typeof classesTotalCount !== 'undefined' && classesTotalCount > 0) { %>
                     <span class="shrink-0 rounded-full border border-zinc-700/80 bg-zinc-900/80 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-400"><%= classesTotalCount %></span>
+                <% } %>
+                <% if (!showCreate) { %>
+                    <a href="/teacher" class="ml-auto shrink-0 text-sm font-medium text-blue-400 no-underline hover:text-blue-300">Create class</a>
                 <% } %>
             </div>
             <div id="class-list" class="space-y-2">
@@ -328,7 +334,20 @@
         </div>
 
         <% } else { %>
-        <!-- Signed-in student home (no teacher tools) -->
+        <!-- Signed-in home: student boards (everyone starts here; /teacher is for teaching) -->
+        <% var ownsClasses = typeof ownsClasses !== 'undefined' && ownsClasses; %>
+        <% if (ownsClasses) { %>
+            <section class="mb-4 rounded-xl border border-blue-500/25 bg-blue-950/20 px-4 py-4 sm:px-5" aria-labelledby="teacher-area-heading">
+                <h2 id="teacher-area-heading" class="text-sm font-semibold text-white">You teach on ClassClimb</h2>
+                <p class="mt-1 text-sm text-zinc-400">Manage classes you created, add students, and award XP.</p>
+                <a
+                    href="/teacher"
+                    class="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white no-underline transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50"
+                >
+                    Open teacher area
+                </a>
+            </section>
+        <% } %>
         <section
             class="mb-6 rounded-xl border border-zinc-800/90 bg-[#0a0a0a] px-3 py-4 sm:px-4"
             aria-labelledby="your-boards-heading"
@@ -359,10 +378,13 @@
                     No boards yet. Open a link from your teacher while signed in.
                 </p>
             <% } %>
-            <p class="mt-4 text-center text-sm text-zinc-500">
-                Teaching a class?
-                <a href="/teacher" class="font-medium text-blue-400 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300">Create your class</a>
-            </p>
+            <% if (!ownsClasses) { %>
+                <p class="mt-4 text-center text-sm text-zinc-500">
+                    Want to run your own class?
+                    <a href="/teacher" class="font-medium text-blue-400 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300">Go to teacher area</a>
+                    to create one.
+                </p>
+            <% } %>
         </section>
 
         <% } %>
@@ -372,7 +394,9 @@
 
 
 <% if (typeof signedIn !== 'undefined' && signedIn && typeof isTeacher !== 'undefined' && isTeacher) { %>
+<% if (typeof showCreateClass !== 'undefined' && showCreateClass) { %>
 <script src="/js/uppercase-input.js" defer></script>
+<% } %>
 <script>try { sessionStorage.removeItem('classclimb_tg_opened'); } catch (e) {}</script>
 <script>
 async function copyLink(id) {
@@ -579,6 +603,7 @@ function appendClassCard(c) {
     var form = document.getElementById('create-class-form');
     var errEl = document.getElementById('create-class-error');
     var submitBtn = document.getElementById('create-class-submit');
+    var teacherPageBase = '<%= typeof pageBase !== "undefined" && pageBase ? pageBase : "/teacher" %>';
 
     if (!form) return;
 
@@ -630,7 +655,7 @@ function appendClassCard(c) {
             var listSection = document.getElementById('class-list-section');
             var curPage = listSection ? parseInt(listSection.getAttribute('data-page') || '1', 10) : 1;
             if (curPage !== 1) {
-                window.location.href = '/?page=1';
+                window.location.href = teacherPageBase + (teacherPageBase.indexOf('?') >= 0 ? '&' : '?') + 'page=1';
                 return;
             }
 
