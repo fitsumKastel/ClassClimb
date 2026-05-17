@@ -159,7 +159,7 @@ function renderStudentHome(req, res, { error }) {
     });
 }
 
-function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, showCreateClass }) {
+function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, showCreateClass, headerBackHref, headerBackLabel }) {
     const teacherId = String(req.session.user_id);
     const formNonce = crypto.randomBytes(32).toString('hex');
     if (showCreateClass) {
@@ -204,7 +204,9 @@ function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, show
                         classesPageSize,
                         formNonce: showCreateClass ? formNonce : null,
                         error: error || null,
-                        pageBase: base
+                        pageBase: base,
+                        headerBackHref: headerBackHref || null,
+                        headerBackLabel: headerBackLabel || 'Back'
                     });
                 }
             );
@@ -220,37 +222,14 @@ function renderSignedInHome(req, res, error) {
 // Create-class flow and teacher tools live here only (not on /).
 app.get('/teacher', requireUser, (req, res) => {
     const error = typeof req.query.error === 'string' ? req.query.error : null;
-    const teacherId = String(req.session.user_id);
-
-    db.get(
-        'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
-        [teacherId],
-        (countErr, countRow) => {
-            if (countErr) {
-                res.status(500).send('Failed to load classes.');
-                return;
-            }
-            const ownedCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
-            if (ownedCount > 0) {
-                renderTeacherDashboard(req, res, {
-                    error,
-                    pageBase: '/teacher',
-                    pageRequested: req.query.page,
-                    showCreateClass: true
-                });
-                return;
-            }
-            const formNonce = crypto.randomBytes(32).toString('hex');
-            req.session.createClassNonce = formNonce;
-            const setupError = typeof req.query.error === 'string' ? req.query.error.trim() : '';
-            res.render('start-teaching', {
-                formNonce,
-                setupError: setupError || null,
-                headerBackHref: '/',
-                headerBackLabel: 'Back to home'
-            });
-        }
-    );
+    renderTeacherDashboard(req, res, {
+        error,
+        pageBase: '/teacher',
+        pageRequested: req.query.page,
+        showCreateClass: true,
+        headerBackHref: '/',
+        headerBackLabel: 'Back to home'
+    });
 });
 
 // Home: guest landing or signed-in student boards (teacher tools on /teacher only)

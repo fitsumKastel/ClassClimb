@@ -112,73 +112,11 @@
         <% var showCreate = typeof showCreateClass !== 'undefined' && showCreateClass; %>
 
         <% if (showCreate) { %>
-        <!-- Teacher: create class (only on /teacher) -->
-        <section
-            class="relative mb-6 overflow-hidden rounded-2xl border border-zinc-800/90 bg-gradient-to-b from-zinc-900/50 to-[#0a0a0a] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
-            aria-labelledby="teacher-create-heading"
-        >
-            <div class="pointer-events-none absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500 opacity-90" aria-hidden="true"></div>
-            <div class="px-4 py-5 sm:px-6 sm:py-6">
-                <div class="mb-6 flex gap-4">
-                    <span
-                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-400"
-                        aria-hidden="true"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </span>
-                    <div class="min-w-0 flex-1 space-y-1.5 pt-0.5">
-                        <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Get started</p>
-                        <h2 id="teacher-create-heading" class="text-lg font-semibold leading-snug tracking-tight text-white sm:text-xl">
-                            Create your class
-                        </h2>
-                        <p class="text-sm leading-relaxed text-zinc-500">
-                            Set up a class to get a share link for students.
-                        </p>
-                    </div>
-                </div>
-                <p id="create-class-error" class="mb-4 hidden rounded-xl border border-red-900/45 bg-red-950/35 px-3 py-2.5 text-sm text-red-200"></p>
-                <form id="create-class-form" action="/class/create" method="POST" class="space-y-4 border-t border-zinc-800/80 pt-5" autocomplete="off">
-                    <input type="hidden" name="_formNonce" value="<%= formNonce %>">
-                    <div class="space-y-1.5">
-                        <label for="create-class-name" class="text-xs font-medium uppercase tracking-wide text-zinc-500">Class name</label>
-                        <input
-                            id="create-class-name"
-                            type="text"
-                            name="className"
-                            placeholder="e.g. 10B MATH"
-                            required
-                            autocomplete="off"
-                            data-uppercase-input
-                            class="w-full select-text uppercase rounded-xl border border-zinc-800 bg-black/50 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
-                        />
-                    </div>
-                    <div class="space-y-1.5">
-                        <label for="create-school-name" class="text-xs font-medium uppercase tracking-wide text-zinc-500">School</label>
-                        <input
-                            id="create-school-name"
-                            type="text"
-                            name="schoolName"
-                            placeholder="SCHOOL NAME"
-                            required
-                            autocomplete="off"
-                            data-uppercase-input
-                            class="w-full select-text uppercase rounded-xl border border-zinc-800 bg-black/50 px-3.5 py-3 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-blue-500/60 focus:ring-2 focus:ring-blue-500/20"
-                        />
-                    </div>
-                    <button
-                        id="create-class-submit"
-                        type="submit"
-                        class="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/25 transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 active:scale-[0.99]"
-                    >
-                        Create class
-                    </button>
-                </form>
-            </div>
-        </section>
+        <%- include('partials/teacher-create-class', { formNonce: formNonce }) %>
         <% } %>
 
+        <% var teacherClassCount = typeof classesTotalCount !== 'undefined' ? classesTotalCount : (classes && classes.length) || 0; %>
+        <% if (!showCreate || teacherClassCount > 0) { %>
         <!-- Teacher: class list -->
         <section
             id="class-list-section"
@@ -280,6 +218,7 @@
                 </nav>
             <% } %>
         </section>
+        <% } %>
 
         <div
             id="delete-class-modal"
