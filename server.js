@@ -1,7 +1,41 @@
 const { loadEnvFromRoot } = require('./lib/load-env');
 loadEnvFromRoot();
 
-require('./lib/storage-paths').initStorage();
+function assertNodeRuntime() {
+    const m = process.version.match(/^v(\d+)\.(\d+)/);
+    const major = m ? parseInt(m[1], 10) : 0;
+    const minor = m ? parseInt(m[2], 10) : 0;
+    if (major < 22 || (major === 22 && minor < 5)) {
+        console.error(
+            `ClassClimb needs Node.js 22.5+ (uses node:sqlite). Current: ${process.version}. ` +
+                'In cPanel → Setup Node.js, select Node 22 and Restart.'
+        );
+        process.exit(1);
+    }
+    try {
+        require('node:sqlite');
+    } catch (err) {
+        console.error(
+            'ClassClimb could not load node:sqlite:',
+            err && err.message ? err.message : err
+        );
+        process.exit(1);
+    }
+}
+assertNodeRuntime();
+
+try {
+    require('./lib/storage-paths').initStorage();
+} catch (err) {
+    console.error(
+        'ClassClimb could not create storage folders:',
+        err && err.message ? err.message : err
+    );
+    console.error(
+        'Set CLASSCLIMB_STORAGE_ROOT in .env or cPanel env vars to a writable path, then restart the app.'
+    );
+    process.exit(1);
+}
 
 const path = require('path');
 const fs = require('fs');
