@@ -247,10 +247,7 @@ app.get('/teacher', requireUser, (req, res) => {
                 formNonce,
                 setupError: setupError || null,
                 headerBackHref: '/',
-                headerBackLabel: 'Back to home',
-                headerEyebrow: 'Get started',
-                headerTitle: 'Create your class',
-                headerSubtitle: 'Set up a class to get a share link for students.'
+                headerBackLabel: 'Back to home'
             });
         }
     );
