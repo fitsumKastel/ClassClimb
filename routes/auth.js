@@ -145,6 +145,13 @@ router.post('/complete', async (req, res) => {
             res.json({ ok: true, redirect: target });
         }
 
+        function finishRedirectHome() {
+            db.get('SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?', [telegramId], (cErr, cRow) => {
+                const owned = !cErr && cRow && Number(cRow.n) > 0;
+                finishRedirect(owned ? '/' : '/teacher');
+            });
+        }
+
         if (rawClass) {
             resolveClassRow(rawClass, (err, classRow) => {
                 delete req.session.last_viewed_class;
@@ -160,13 +167,13 @@ router.post('/complete', async (req, res) => {
                 } else if (afterLogin) {
                     finishRedirect(afterLogin);
                 } else {
-                    finishRedirect('/');
+                    finishRedirectHome();
                 }
             });
         } else if (afterLogin) {
             finishRedirect(afterLogin);
         } else {
-            finishRedirect('/');
+            finishRedirectHome();
         }
     } catch (e) {
         console.error('POST /auth/complete:', e);

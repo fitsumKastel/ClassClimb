@@ -152,10 +152,14 @@ function renderStudentHome(req, res, { error }) {
     );
 }
 
-function renderTeacherDashboard(req, res, { error, pageBase, pageRequested }) {
+function renderTeacherDashboard(req, res, { error, pageBase, pageRequested, showCreateClass }) {
     const teacherId = String(req.session.user_id);
     const formNonce = crypto.randomBytes(32).toString('hex');
-    req.session.createClassNonce = formNonce;
+    if (showCreateClass) {
+        req.session.createClassNonce = formNonce;
+    } else {
+        delete req.session.createClassNonce;
+    }
 
     const classesPageSize = Math.max(1, parseInt(process.env.CLASSES_PAGE_SIZE || '10', 10) || 10);
     const pageReq = Math.max(1, parseInt(pageRequested, 10) || 1);
@@ -185,12 +189,13 @@ function renderTeacherDashboard(req, res, { error, pageBase, pageRequested }) {
                     res.render('index', {
                         signedIn: true,
                         isTeacher: true,
+                        showCreateClass: showCreateClass === true,
                         classes: classes || [],
                         classesPage: page,
                         classesTotalPages: totalPages,
                         classesTotalCount: totalCount,
                         classesPageSize,
-                        formNonce,
+                        formNonce: showCreateClass ? formNonce : null,
                         error: error || null,
                         pageBase: base
                     });
@@ -241,6 +246,7 @@ function renderSignedInHome(req, res, error) {
                 }
             );
         }
+<<<<<<< Updated upstream
     );
 }
 
@@ -269,6 +275,21 @@ app.get('/teacher', requireUser, (req, res) => {
             renderStudentHome(req, res, { error });
         }
     );
+=======
+        const formNonce = crypto.randomBytes(32).toString('hex');
+        req.session.createClassNonce = formNonce;
+        const setupError = typeof req.query.error === 'string' ? req.query.error.trim() : '';
+        res.render('start-teaching', {
+            formNonce,
+            setupError: setupError || null,
+            headerBackHref: '/',
+            headerBackLabel: 'Back to home',
+            headerEyebrow: 'Get started',
+            headerTitle: 'Create your class',
+            headerSubtitle: 'Set up a class to get a share link for students.'
+        });
+    });
+>>>>>>> Stashed changes
 });
 
 // Home: guest landing vs signed-in teacher dashboard
@@ -302,6 +323,116 @@ app.get('/', (req, res) => {
     const rawSubscribeClass = typeof req.query.class_id === 'string' ? req.query.class_id.trim() : '';
     const subscribeReturn = safeReturnPath(req.query.return);
 
+<<<<<<< Updated upstream
+=======
+    function renderStudentHome(teacherId) {
+        delete req.session.createClassNonce;
+        db.all(
+            `SELECT DISTINCT c.id, c.view_id, c.class_name, c.school_name
+             FROM subscriptions s
+             INNER JOIN classes c ON c.id = s.class_id
+             WHERE s.telegram_id = ?
+             ORDER BY c.class_name COLLATE NOCASE ASC, c.id ASC`,
+            [teacherId],
+            (subErr, boards) => {
+                if (subErr) {
+                    res.status(500).send('Failed to load your boards.');
+                    return;
+                }
+                res.render('index', {
+                    signedIn: true,
+                    isTeacher: false,
+                    studentBoards: boards || [],
+                    classes: [],
+                    error
+                });
+            }
+        );
+    }
+
+    function renderTeacherDashboard(teacherId) {
+        const formNonce = crypto.randomBytes(32).toString('hex');
+        req.session.createClassNonce = formNonce;
+
+        const classesPageSize = Math.max(1, parseInt(process.env.CLASSES_PAGE_SIZE || '10', 10) || 10);
+        const pageRequested = Math.max(1, parseInt(req.query.page, 10) || 1);
+
+        db.get(
+            'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
+            [teacherId],
+            (countErr, countRow) => {
+                if (countErr) {
+                    res.status(500).send('Failed to load classes.');
+                    return;
+                }
+                const totalCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
+                const totalPages = Math.max(1, Math.ceil(totalCount / classesPageSize));
+                const page = Math.min(pageRequested, totalPages);
+                const offset = (page - 1) * classesPageSize;
+
+                db.all(
+                    'SELECT * FROM classes WHERE teacher_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
+                    [teacherId, classesPageSize, offset],
+                    (err, classes) => {
+                        if (err) {
+                            res.status(500).send('Failed to load classes.');
+                            return;
+                        }
+                        res.render('index', {
+                            signedIn: true,
+                            isTeacher: true,
+                            classes: classes || [],
+                            classesPage: page,
+                            classesTotalPages: totalPages,
+                            classesTotalCount: totalCount,
+                            classesPageSize,
+                            formNonce,
+                            error
+                        });
+                    }
+                );
+            }
+        );
+    }
+
+    function renderSignedInDashboard() {
+        const teacherId = String(req.session.user_id);
+
+        db.get(
+            'SELECT COUNT(*) AS n FROM classes WHERE teacher_id = ?',
+            [teacherId],
+            (countErr, countRow) => {
+                if (countErr) {
+                    res.status(500).send('Failed to load classes.');
+                    return;
+                }
+                const ownedCount = countRow && countRow.n != null ? Number(countRow.n) : 0;
+                if (ownedCount === 0) {
+                    db.get(
+                        'SELECT COUNT(*) AS n FROM subscriptions WHERE telegram_id = ?',
+                        [teacherId],
+                        (subCountErr, subCountRow) => {
+                            if (subCountErr) {
+                                res.status(500).send('Failed to load your account.');
+                                return;
+                            }
+                            const subCount =
+                                subCountRow && subCountRow.n != null ? Number(subCountRow.n) : 0;
+                            if (subCount === 0) {
+                                res.redirect(303, '/teacher');
+                                return;
+                            }
+                            renderStudentHome(teacherId);
+                        }
+                    );
+                    return;
+                }
+                renderTeacherDashboard(teacherId);
+            }
+        );
+    }
+
+>>>>>>> Stashed changes
     if (subscribeLinkId && rawSubscribeClass && subscribeReturn) {
         const lookupCb =
             /^\d+$/.test(rawSubscribeClass) ?

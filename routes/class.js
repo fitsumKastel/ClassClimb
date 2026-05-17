@@ -22,6 +22,36 @@ function canManageClass(classInfo, userId) {
     return owner === String(userId);
 }
 
+function trimBodyField(value) {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function newClassViewId() {
+    return uuidv4().replace(/-/g, '').slice(0, 12);
+}
+
+function isViewIdUniqueError(err) {
+    if (!err || !err.message) {
+        return false;
+    }
+    return /UNIQUE constraint failed:.*view_id/i.test(String(err.message));
+}
+
+const INSERT_CLASS_SQL = `INSERT INTO classes (
+    teacher_id, class_name, school_name, view_id,
+    class_pdf_rev, pdf_follow_active, pdf_follow_page
+) VALUES (?, ?, ?, ?, 0, 0, 1)`;
+
+function insertClassRecord(teacherId, className, schoolName, viewId, attempt, callback) {
+    db.run(INSERT_CLASS_SQL, [teacherId, className, schoolName, viewId], function (err) {
+        if (err && isViewIdUniqueError(err) && attempt < 8) {
+            insertClassRecord(teacherId, className, schoolName, newClassViewId(), attempt + 1, callback);
+            return;
+        }
+        callback.call(this, err, viewId);
+    });
+}
+
 // Teacher manage page for a specific class (by share view_id)
 router.get('/manage/:id', (req, res) => {
     const viewId = req.params.id;
@@ -80,8 +110,11 @@ router.post('/create', (req, res) => {
         return;
     }
 
-    delete req.session.createClassNonce;
+    const className = trimBodyField(req.body.className);
+    const schoolName = trimBodyField(req.body.schoolName);
+    const teacherId = String(req.session.user_id || '').trim();
 
+<<<<<<< Updated upstream
     const className = formatClassLabel(typeof req.body.className === 'string' ? req.body.className : '');
     const schoolName = formatClassLabel(typeof req.body.schoolName === 'string' ? req.body.schoolName : '');
     if (!className || !schoolName) {
@@ -95,34 +128,57 @@ router.post('/create', (req, res) => {
 
     const teacherId = req.session.user_id;
     const viewId = uuidv4().substring(0, 8); // Short unique ID for the URL
+=======
+    if (!teacherId) {
+        if (wantsJson) {
+            res.status(401).json({ ok: false, error: 'not_signed_in' });
+            return;
+        }
+        res.redirect(303, '/auth/login?return=' + encodeURIComponent('/teacher'));
+        return;
+    }
+>>>>>>> Stashed changes
 
-    db.run(`INSERT INTO classes (teacher_id, class_name, school_name, view_id) VALUES (?, ?, ?, ?)`,
-        [teacherId, className, schoolName, viewId], function (err) {
-            if (err) {
-                if (wantsJson) {
-                    res.status(500).json({ ok: false, error: 'create_failed' });
-                    return;
-                }
-                res.send('Error creating class.');
-                return;
-            }
+    if (!className || !schoolName) {
+        if (wantsJson) {
+            res.status(400).json({ ok: false, error: 'missing_fields' });
+            return;
+        }
+        res.redirect(303, '/teacher?error=' + encodeURIComponent('Class name and school are required.'));
+        return;
+    }
 
-            const newClass = {
-                id: this.lastID,
-                view_id: viewId,
-                class_name: className,
-                school_name: schoolName
-            };
+    const viewId = newClassViewId();
 
+    insertClassRecord(teacherId, className, schoolName, viewId, 0, function (err, insertedViewId) {
+        if (err) {
+            console.error('POST /class/create:', err.message || err);
             if (wantsJson) {
-                const formNonce = crypto.randomBytes(32).toString('hex');
-                req.session.createClassNonce = formNonce;
-                res.json({ ok: true, class: newClass, formNonce });
+                res.status(500).json({ ok: false, error: 'create_failed' });
                 return;
             }
+            res.status(500).send('Error creating class.');
+            return;
+        }
 
-            res.redirect(303, `/class/manage/${viewId}`);
-        });
+        delete req.session.createClassNonce;
+
+        const newClass = {
+            id: this.lastID,
+            view_id: insertedViewId,
+            class_name: className,
+            school_name: schoolName
+        };
+
+        if (wantsJson) {
+            const formNonce = crypto.randomBytes(32).toString('hex');
+            req.session.createClassNonce = formNonce;
+            res.json({ ok: true, class: newClass, formNonce });
+            return;
+        }
+
+        res.redirect(303, `/class/manage/${insertedViewId}`);
+    });
 });
 
 // Delete class (teacher only); removes students and subscriptions

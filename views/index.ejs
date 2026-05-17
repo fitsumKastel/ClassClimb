@@ -359,6 +359,10 @@
                     No boards yet. Open a link from your teacher while signed in.
                 </p>
             <% } %>
+            <p class="mt-4 text-center text-sm text-zinc-500">
+                Teaching a class?
+                <a href="/teacher" class="font-medium text-blue-400 underline decoration-blue-500/40 underline-offset-2 hover:text-blue-300">Create your class</a>
+            </p>
         </section>
 
         <% } %>
@@ -613,6 +617,8 @@ function appendClassCard(c) {
                 var msg = 'Could not create class. Please try again.';
                 if (data && data.error === 'invalid_nonce') {
                     msg = 'This page is out of date. Refresh and try again.';
+                } else if (data && data.error === 'missing_fields') {
+                    msg = 'Enter both a class name and a school name.';
                 }
                 if (errEl) {
                     errEl.textContent = msg;

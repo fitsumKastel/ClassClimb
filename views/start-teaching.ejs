@@ -1,0 +1,115 @@
+<%- include('partials/header') %>
+
+<div class="bg-[#000] text-white min-h-[calc(100svh-4rem)] flex flex-col items-center px-3 py-6 sm:px-4 sm:py-8">
+    <div class="w-full max-w-md lg:w-[30%] lg:min-w-0 my-auto">
+        <div class="bg-[#111] p-4 sm:p-6 rounded-2xl border border-gray-900">
+            <% if (typeof setupError !== 'undefined' && setupError) { %>
+                <p class="mb-4 rounded-xl border border-red-900/45 bg-red-950/35 px-3 py-2.5 text-sm text-red-200"><%= setupError %></p>
+            <% } %>
+            <p id="create-class-error" class="mb-4 hidden rounded-xl border border-red-900/45 bg-red-950/35 px-3 py-2.5 text-sm text-red-200"></p>
+            <form id="create-class-form" action="/class/create" method="POST" class="space-y-4" autocomplete="off">
+                <input type="hidden" name="_formNonce" value="<%= formNonce %>">
+                <input
+                    type="text"
+                    name="className"
+                    placeholder="Class Name (e.g. 10B Math)"
+                    required
+                    autocomplete="off"
+                    class="w-full select-text bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
+                >
+                <input
+                    type="text"
+                    name="schoolName"
+                    placeholder="School Name"
+                    required
+                    autocomplete="off"
+                    class="w-full select-text bg-[#050505] border border-gray-800 p-3 rounded-lg focus:border-blue-600 outline-none transition"
+                >
+                <button
+                    id="create-class-submit"
+                    type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-500 font-bold py-3 rounded-lg transition text-white disabled:opacity-50"
+                >
+                    Create New Class
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('create-class-form');
+    var errEl = document.getElementById('create-class-error');
+    var submitBtn = document.getElementById('create-class-submit');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (errEl) {
+            errEl.textContent = '';
+            errEl.classList.add('hidden');
+        }
+        var prevText = submitBtn ? submitBtn.textContent : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating…';
+        }
+
+        var fd = new FormData(form);
+        var body = new URLSearchParams(fd);
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: body.toString(),
+            credentials: 'same-origin'
+        })
+            .then(function (res) {
+                var ct = res.headers.get('content-type') || '';
+                if (ct.includes('application/json')) {
+                    return res.json().then(function (data) {
+                        return { ok: res.ok, data: data };
+                    });
+                }
+                return { ok: false, data: null };
+            })
+            .then(function (result) {
+                if (result.ok && result.data && result.data.ok && result.data.class && result.data.class.view_id) {
+                    window.location.href = '/class/manage/' + result.data.class.view_id;
+                    return;
+                }
+                var msg = 'Could not create class. Please try again.';
+                if (result.data && result.data.error === 'invalid_nonce') {
+                    msg = 'This page is out of date. Refresh and try again.';
+                } else if (result.data && result.data.error === 'missing_fields') {
+                    msg = 'Enter both a class name and a school name.';
+                }
+                if (errEl) {
+                    errEl.textContent = msg;
+                    errEl.classList.remove('hidden');
+                }
+                var nonceInput = form.querySelector('[name=_formNonce]');
+                if (nonceInput && result.data && result.data.formNonce) {
+                    nonceInput.value = result.data.formNonce;
+                }
+            })
+            .catch(function () {
+                if (errEl) {
+                    errEl.textContent = 'Network error. Check your connection and try again.';
+                    errEl.classList.remove('hidden');
+                }
+            })
+            .finally(function () {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = prevText || 'Create New Class';
+                }
+            });
+    });
+})();
+</script>
+
+<%- include('partials/footer') %>
